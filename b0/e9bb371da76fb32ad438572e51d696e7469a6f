@@ -1,0 +1,39 @@
+DECISIONS.md
+  s_cfe57713647727::t_c61415cba9381e 113-124
+LEARNING.md
+  s_cfe57713647727::t_0aff69783739a8 59-61
+PROGRESS.md
+  s_cfe57713647727::t_1a4c6aae35840d 22,25-26,32-33,38-41,51,68-71
+evals/README.md
+  s_cfe57713647727::t_5d9ee639aae9ee 30-35
+evals/fixtures/resilience-distractor.md
+  s_cfe57713647727::t_9df77aeebce43b 1-6
+evals/retrieval_cases.json
+  s_cfe57713647727::t_bcfba73c8eb69a 85-91
+src/internmemory/api.py
+  s_cfe57713647727::t_62c42e6c1f20d8 417-421
+src/internmemory/evaluation.py
+  s_cfe57713647727::t_2663da234dc370 21-27,154,158,354-360
+src/internmemory/retrieval_service.py
+  s_cfe57713647727::t_8450b15797c1eb 31,97-104
+tests/test_document_search.py
+  s_cfe57713647727::t_cc521146b96be6 175-178,190-193,201
+tests/test_evaluation.py
+  s_cfe57713647727::t_eeef6c5f7b518d 20-21,23-25,64-66,72,86-88,94,108-134
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "b0e9bb371da76fb32ad438572e51d696e7469a6f",
+  "prompts": {},
+  "sessions": {
+    "s_cfe57713647727": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "3c5540e7-abd4-431d-8200-1b40efcb5929",
+        "model": "unknown"
+      },
+      "human_author": "Daho Mita <dahomita17062006@gmail.com>"
+    }
+  }
+}
