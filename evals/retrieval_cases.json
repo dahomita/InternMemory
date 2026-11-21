@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "cases": [
+    {
+      "id": "batch-tail-latency",
+      "query": "batching tail latency",
+      "relevant_source": "batching.md",
+      "required_text": "Waiting for a batch to fill can increase tail latency."
+    },
+    {
+      "id": "batch-throughput-overhead",
+      "query": "throughput per-request overhead",
+      "relevant_source": "batching.md",
+      "required_text": "Larger batches can improve throughput by amortizing per-request overhead."
+    },
+    {
+      "id": "sqlite-wal-concurrency",
+      "query": "SQLite WAL readers writer",
+      "relevant_source": "sqlite-reliability.md",
+      "required_text": "SQLite WAL mode allows readers to continue while a writer commits changes."
+    },
+    {
+      "id": "sqlite-lock-contention",
+      "query": "busy timeout lock contention",
+      "relevant_source": "sqlite-reliability.md",
+      "required_text": "A busy timeout can reduce immediate failures during temporary lock contention."
+    },
+    {
+      "id": "agent-bounded-loops",
+      "query": "agent bounded tool calls",
+      "relevant_source": "agent-harness.md",
+      "required_text": "An agent harness should enforce bounded tool calls"
+    },
+    {
+      "id": "agent-tool-validation",
+      "query": "tool results schema validation",
+      "relevant_source": "agent-harness.md",
+      "required_text": "Tool results require schema validation before they enter model context."
+    }
+  ]
+}

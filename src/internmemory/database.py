@@ -64,6 +64,77 @@ CREATE INDEX IF NOT EXISTS tasks_project_id_idx ON tasks(project_id);
 CREATE INDEX IF NOT EXISTS tasks_status_idx ON tasks(status);
 CREATE INDEX IF NOT EXISTS tasks_due_date_idx ON tasks(due_date);
 
+CREATE TABLE IF NOT EXISTS sources (
+    id INTEGER PRIMARY KEY,
+    source_type TEXT NOT NULL
+        CHECK (source_type IN ('markdown', 'text')),
+    locator TEXT NOT NULL UNIQUE,
+    title TEXT NOT NULL
+        CHECK (length(trim(title)) > 0),
+    content TEXT NOT NULL
+        CHECK (length(trim(content)) > 0),
+    content_hash TEXT NOT NULL
+        CHECK (length(content_hash) = 64),
+    byte_size INTEGER NOT NULL
+        CHECK (byte_size > 0),
+    created_at TEXT NOT NULL
+        DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+    updated_at TEXT NOT NULL
+        DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+);
+
+CREATE INDEX IF NOT EXISTS sources_content_hash_idx
+ON sources(content_hash);
+
+CREATE TABLE IF NOT EXISTS source_chunks (
+    id INTEGER PRIMARY KEY,
+    source_id INTEGER NOT NULL,
+    ordinal INTEGER NOT NULL
+        CHECK (ordinal >= 0),
+    start_offset INTEGER NOT NULL
+        CHECK (start_offset >= 0),
+    end_offset INTEGER NOT NULL
+        CHECK (end_offset > start_offset),
+    content TEXT NOT NULL
+        CHECK (length(content) > 0),
+    content_hash TEXT NOT NULL
+        CHECK (length(content_hash) = 64),
+    created_at TEXT NOT NULL
+        DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+    FOREIGN KEY (source_id) REFERENCES sources(id) ON DELETE CASCADE,
+    UNIQUE (source_id, ordinal)
+);
+
+CREATE INDEX IF NOT EXISTS source_chunks_source_id_idx
+ON source_chunks(source_id);
+
+CREATE VIRTUAL TABLE IF NOT EXISTS source_chunks_fts USING fts5(
+    content,
+    content='source_chunks',
+    content_rowid='id',
+    tokenize='unicode61'
+);
+
+CREATE TRIGGER IF NOT EXISTS source_chunks_fts_insert
+AFTER INSERT ON source_chunks BEGIN
+    INSERT INTO source_chunks_fts(rowid, content)
+    VALUES (new.id, new.content);
+END;
+
+CREATE TRIGGER IF NOT EXISTS source_chunks_fts_delete
+AFTER DELETE ON source_chunks BEGIN
+    INSERT INTO source_chunks_fts(source_chunks_fts, rowid, content)
+    VALUES ('delete', old.id, old.content);
+END;
+
+CREATE TRIGGER IF NOT EXISTS source_chunks_fts_update
+AFTER UPDATE OF content ON source_chunks BEGIN
+    INSERT INTO source_chunks_fts(source_chunks_fts, rowid, content)
+    VALUES ('delete', old.id, old.content);
+    INSERT INTO source_chunks_fts(rowid, content)
+    VALUES (new.id, new.content);
+END;
+
 CREATE VIRTUAL TABLE IF NOT EXISTS notes_fts USING fts5(
     title,
     content,
@@ -112,6 +183,10 @@ def initialize_database(path: str | Path) -> None:
             connection.executescript(DATABASE_SCHEMA)
             connection.execute(
                 "INSERT INTO notes_fts(notes_fts) VALUES ('rebuild')"
+            )
+            connection.execute(
+                "INSERT INTO source_chunks_fts(source_chunks_fts) "
+                "VALUES ('rebuild')"
             )
     finally:
         connection.close()

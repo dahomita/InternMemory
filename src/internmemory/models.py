@@ -14,6 +14,13 @@ class TaskStatus(str, Enum):
     COMPLETED = "completed"
 
 
+class SourceType(str, Enum):
+    """Supported local document formats."""
+
+    MARKDOWN = "markdown"
+    TEXT = "text"
+
+
 @dataclass(frozen=True, slots=True)
 class Project:
     """A persisted engineering project."""
@@ -58,3 +65,52 @@ class Task:
     completed_at: datetime | None
     created_at: datetime
     updated_at: datetime
+
+
+@dataclass(frozen=True, slots=True)
+class Source:
+    """A captured local document and its provenance."""
+
+    id: int
+    source_type: SourceType
+    locator: str
+    title: str
+    content: str
+    content_hash: str
+    byte_size: int
+    created_at: datetime
+    updated_at: datetime
+
+
+@dataclass(frozen=True, slots=True)
+class SourceChunk:
+    """A searchable evidence unit with exact source character offsets."""
+
+    id: int
+    source_id: int
+    ordinal: int
+    start_offset: int
+    end_offset: int
+    content: str
+    content_hash: str
+    created_at: datetime
+
+
+@dataclass(frozen=True, slots=True)
+class SourceReference:
+    """Citation metadata without the source's full stored content."""
+
+    id: int
+    source_type: SourceType
+    locator: str
+    title: str
+    content_hash: str
+
+
+@dataclass(frozen=True, slots=True)
+class DocumentSearchResult:
+    """A ranked source chunk paired with citation metadata."""
+
+    source: SourceReference
+    chunk: SourceChunk
+    score: float

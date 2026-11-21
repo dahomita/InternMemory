@@ -14,6 +14,8 @@ __pycache__/
 *.db
 *.db-shm
 *.db-wal
+documents/*
+!documents/.gitkeep
 
 # Editor and operating-system files
 .DS_Store

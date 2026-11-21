@@ -10,7 +10,7 @@ from pydantic import (
     model_validator,
 )
 
-from internmemory.models import TaskStatus
+from internmemory.models import SourceType, TaskStatus
 
 
 class HealthResponse(BaseModel):
@@ -46,6 +46,72 @@ class ProjectResponse(BaseModel):
     description: str
     created_at: datetime
     updated_at: datetime
+
+
+class SourceIngestRequest(BaseModel):
+    """Validated local source-ingestion request."""
+
+    relative_path: str = Field(min_length=1, max_length=500)
+
+    @field_validator("relative_path")
+    @classmethod
+    def path_must_not_be_blank(cls, value: str) -> str:
+        """Reject paths containing only whitespace."""
+
+        if not value.strip():
+            raise ValueError("relative_path must not be blank")
+        return value
+
+
+class SourceResponse(BaseModel):
+    """Public representation of an ingested source snapshot."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    source_type: SourceType
+    locator: str
+    title: str
+    content_hash: str
+    byte_size: int
+    created_at: datetime
+    updated_at: datetime
+
+
+class SourceReferenceResponse(BaseModel):
+    """Citation metadata for a retrieved source."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    source_type: SourceType
+    locator: str
+    title: str
+    content_hash: str
+
+
+class SourceChunkResponse(BaseModel):
+    """A retrieved evidence unit with exact source offsets."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    source_id: int
+    ordinal: int
+    start_offset: int
+    end_offset: int
+    content: str
+    content_hash: str
+
+
+class DocumentSearchResultResponse(BaseModel):
+    """A ranked chunk and its citation metadata."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    source: SourceReferenceResponse
+    chunk: SourceChunkResponse
+    score: float
 
 
 class TaskCreate(BaseModel):

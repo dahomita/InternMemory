@@ -7,6 +7,7 @@ from pathlib import Path
 
 from internmemory.database import connect_database
 from internmemory.models import Note, NoteSearchResult
+from internmemory.search_query import build_literal_fts_query
 
 
 class NoteRepository:
@@ -99,8 +100,7 @@ class NoteRepository:
     ) -> list[NoteSearchResult]:
         """Return FTS5 matches ordered by BM25 relevance."""
 
-        if not query.strip():
-            raise ValueError("search query must not be blank")
+        fts_query = build_literal_fts_query(query)
 
         connection = connect_database(self._database_path)
         try:
@@ -113,7 +113,7 @@ class NoteRepository:
                 ORDER BY score ASC, n.id ASC
                 LIMIT ?
                 """,
-                (query, limit),
+                (fts_query, limit),
             ).fetchall()
         finally:
             connection.close()

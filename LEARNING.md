@@ -16,6 +16,17 @@
 - Fixed task states provide more information than a completed boolean.
 - Application services orchestrate repositories without coupling them to HTTP.
 - Timezone-aware clocks make date behavior accurate and testable.
+- Source snapshots and hashes preserve provenance and detect content revisions.
+- Chunking changes retrieval granularity rather than guaranteeing faster search.
+- BM25 ranks chunks against other chunks; it does not rank text within a chunk.
+- Chunk boundaries trade precision against missing neighboring context.
+- Exact offsets let a retrieved chunk cite and reconstruct its source passage.
+- Recall@5 measures whether relevant evidence appears in the top five but not
+  whether it ranks first.
+- MRR rewards systems that place the first relevant result earlier.
+- Raw FTS5 syntax can turn punctuation such as hyphens into query operators.
+- Literal query normalization separates user text from FTS5 query syntax and
+  should be evaluated against the same fixed ground-truth cases.
 
 ## Clarifications and Corrections
 
@@ -31,8 +42,8 @@
 
 ## Still to Study
 
-- Retrieval Recall@k and Mean Reciprocal Rank
-- Document chunking and ingestion
+- Larger, representative retrieval datasets and failure classification
+- Chunk overlap, neighbor expansion, and parent-child retrieval
 - Semantic embeddings and hybrid retrieval
 - Agent tool schemas, execution loops, and termination
 - Context budgets and evidence grounding

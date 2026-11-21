@@ -50,3 +50,41 @@
 - **Decision:** Configure an IANA timezone, allow explicit date overrides, and
   inject the clock in tests.
 - **Tradeoff:** Additional configuration, but accurate and reproducible dates.
+
+## ADR-008: Store bounded source snapshots
+
+- **Problem:** File paths can move or point to changed content, breaking
+  reproducibility and citations.
+- **Decision:** Store UTF-8 snapshots, SHA-256 hashes, relative locators, and
+  enforce an allowlisted root and size limit.
+- **Tradeoff:** SQLite stores duplicate file content, but retrieval remains
+  local, reproducible, and independent of the original file.
+
+## ADR-009: Start with deterministic chunks without overlap
+
+- **Problem:** Whole-document ranking is imprecise, while overlap duplicates
+  indexed evidence and can distort rankings.
+- **Decision:** Prefer paragraph and word boundaries, preserve exact offsets,
+  enforce a character bound, and begin without overlap.
+- **Tradeoff:** Cross-boundary context may be missed. Evaluate neighbor
+  expansion or overlap against labeled failures before adding complexity.
+
+## ADR-010: Version retrieval ground truth before optimization
+
+- **Problem:** Search changes cannot be justified from demonstrations alone.
+- **Decision:** Keep fictional fixture documents and human-labeled evidence
+  cases in Git; report Recall@5, MRR, median latency, and p95 latency.
+- **Tradeoff:** Initial metrics reflect a very small corpus and must not be
+  generalized. Known failures remain visible until a measured change fixes
+  them.
+
+## ADR-011: Treat user search input as literal text
+
+- **Problem:** Raw FTS5 syntax interpreted punctuation such as the hyphen in
+  `per-request` as an operator and caused query failure.
+- **Decision:** Extract word/number tokens and build a quoted AND expression.
+  Advanced FTS syntax may be added later only through an explicit mode.
+- **Evidence:** On the same six labeled cases, Recall@5 and MRR improved from
+  `0.8333` to `1.0` with essentially unchanged median latency.
+- **Tradeoff:** AND semantics can over-constrain natural-language queries and
+  do not address synonyms or semantic mismatch.

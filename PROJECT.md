@@ -27,6 +27,10 @@ Storage and retrieval remain independent of model providers.
 - FTS5 keyword search with BM25 ranking
 - Structured task states and unfinished-task retrieval
 - Timezone-aware deterministic morning recaps
+- Bounded Markdown and text source ingestion with SHA-256 snapshots
+- Deterministic source chunking with exact citation offsets
+- FTS5/BM25 document-chunk retrieval with source citations
+- Versioned fictional retrieval corpus and labeled evaluation runner
 - Temporary-database integration tests
 
 ## Requirements

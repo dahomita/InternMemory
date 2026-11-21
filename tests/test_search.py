@@ -59,10 +59,10 @@ def test_search_index_tracks_updates_and_deletes(tmp_path: Path) -> None:
     assert repository.search_notes("replacementkeyword") == []
 
 
-def test_search_endpoint_returns_scores_and_rejects_bad_syntax(
+def test_search_endpoint_handles_literal_punctuation_and_empty_terms(
     tmp_path: Path,
 ) -> None:
-    """The HTTP boundary exposes ranked results and safe query errors."""
+    """User punctuation is literal while punctuation-only input is invalid."""
 
     app = create_app(tmp_path / "internmemory.db")
 
@@ -79,13 +79,21 @@ def test_search_endpoint_returns_scores_and_rejects_bad_syntax(
             "/search/notes",
             params={"q": "retrieval"},
         )
-        invalid_response = client.get(
+        literal_response = client.get(
             "/search/notes",
             params={"q": '"unterminated'},
+        )
+        invalid_response = client.get(
+            "/search/notes",
+            params={"q": "---"},
         )
 
     assert search_response.status_code == 200
     assert search_response.json()[0]["note"]["title"] == "Retrieval latency"
     assert isinstance(search_response.json()[0]["score"], float)
-    assert invalid_response.status_code == 400
-    assert invalid_response.json() == {"detail": "Invalid search query"}
+    assert literal_response.status_code == 200
+    assert literal_response.json() == []
+    assert invalid_response.status_code == 422
+    assert invalid_response.json() == {
+        "detail": "search query must contain a word or number"
+    }

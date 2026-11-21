@@ -15,11 +15,14 @@ from fastapi import (
     status,
 )
 
+from internmemory.chunk_repository import ChunkRepository
+from internmemory.ingestion_service import IngestionService
 from internmemory.note_repository import NoteRepository
 from internmemory.project_repository import ProjectRepository
 from internmemory.recap_service import RecapService
 from internmemory.task_repository import TaskRepository
 from internmemory.schemas import (
+    DocumentSearchResultResponse,
     HealthResponse,
     MorningRecapResponse,
     NoteCreate,
@@ -28,6 +31,8 @@ from internmemory.schemas import (
     NoteUpdate,
     ProjectCreate,
     ProjectResponse,
+    SourceIngestRequest,
+    SourceResponse,
     TaskCreate,
     TaskResponse,
     TaskStatusUpdate,
@@ -89,6 +94,32 @@ RecapServiceDependency = Annotated[
 ]
 
 
+def get_ingestion_service(request: Request) -> IngestionService:
+    """Return the ingestion service configured for this application."""
+
+    service: IngestionService = request.app.state.ingestion_service
+    return service
+
+
+IngestionServiceDependency = Annotated[
+    IngestionService,
+    Depends(get_ingestion_service),
+]
+
+
+def get_chunk_repository(request: Request) -> ChunkRepository:
+    """Return the chunk repository configured for this application."""
+
+    repository: ChunkRepository = request.app.state.chunk_repository
+    return repository
+
+
+ChunkRepositoryDependency = Annotated[
+    ChunkRepository,
+    Depends(get_chunk_repository),
+]
+
+
 @router.get("/health", response_model=HealthResponse)
 def health() -> HealthResponse:
     """Report whether the API process can serve requests."""
@@ -105,6 +136,29 @@ def get_morning_recap(
 
     recap = service.build_morning_recap(work_date)
     return MorningRecapResponse.model_validate(recap)
+
+
+@router.post("/sources/ingest", response_model=SourceResponse)
+def ingest_source(
+    request: SourceIngestRequest,
+    service: IngestionServiceDependency,
+) -> SourceResponse:
+    """Capture one allowlisted local Markdown or text document."""
+
+    try:
+        source = service.ingest_file(request.relative_path)
+    except FileNotFoundError as error:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Source file not found",
+        ) from error
+    except ValueError as error:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail=str(error),
+        ) from error
+
+    return SourceResponse.model_validate(source)
 
 
 @router.post(
@@ -274,6 +328,11 @@ def search_notes(
 
     try:
         results = repository.search_notes(q, limit=limit)
+    except ValueError as error:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail=str(error),
+        ) from error
     except sqlite3.OperationalError as error:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -282,6 +341,42 @@ def search_notes(
 
     return [
         NoteSearchResultResponse.model_validate(result)
+        for result in results
+    ]
+
+
+@router.get(
+    "/search/documents",
+    response_model=list[DocumentSearchResultResponse],
+)
+def search_documents(
+    repository: ChunkRepositoryDependency,
+    q: Annotated[str, Query(min_length=1, max_length=200)],
+    limit: Annotated[int, Query(ge=1, le=100)] = 20,
+) -> list[DocumentSearchResultResponse]:
+    """Search ingested source chunks using FTS5 and BM25."""
+
+    if not q.strip():
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="Search query must not be blank",
+        )
+
+    try:
+        results = repository.search(q, limit=limit)
+    except ValueError as error:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail=str(error),
+        ) from error
+    except sqlite3.OperationalError as error:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid search query",
+        ) from error
+
+    return [
+        DocumentSearchResultResponse.model_validate(result)
         for result in results
     ]
 
