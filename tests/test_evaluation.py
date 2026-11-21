@@ -17,12 +17,12 @@ def test_fictional_keyword_baseline_retrieves_labeled_evidence() -> None:
         project_root / "evals" / "fixtures",
     )
 
-    assert report.case_count == 12
-    assert report.answerable_case_count == 10
+    assert report.case_count == 13
+    assert report.answerable_case_count == 11
     assert report.no_answer_case_count == 2
-    assert report.recall_at_k == pytest.approx(7 / 10)
-    assert report.mrr == pytest.approx(13 / 20)
-    assert report.mean_precision_at_k == pytest.approx(13 / 20)
+    assert report.recall_at_k == pytest.approx(8 / 11)
+    assert report.mrr == pytest.approx(15 / 22)
+    assert report.mean_precision_at_k == pytest.approx(15 / 22)
     assert report.no_answer_accuracy == pytest.approx(1.0)
     failed_cases = {
         result.case_id: result.category
@@ -61,15 +61,15 @@ def test_any_term_candidates_improve_recall_but_remain_broad() -> None:
         strategy="any",
     )
 
-    assert report.recall_at_k == pytest.approx(9 / 10)
-    assert report.mrr == pytest.approx(4 / 5)
-    assert report.mean_precision_at_k == pytest.approx(7 / 15)
+    assert report.recall_at_k == pytest.approx(10 / 11)
+    assert report.mrr == pytest.approx(17 / 22)
+    assert report.mean_precision_at_k == pytest.approx(1 / 2)
     boundary_case = next(
         result
         for result in report.cases
         if result.case_id == "resilience-cross-chunk"
     )
-    assert boundary_case.rank == 1
+    assert boundary_case.rank == 2
 
 
 def test_prioritized_candidates_keep_strict_results_first() -> None:
@@ -83,15 +83,15 @@ def test_prioritized_candidates_keep_strict_results_first() -> None:
         strategy="prioritized",
     )
 
-    assert report.recall_at_k == pytest.approx(9 / 10)
-    assert report.mrr == pytest.approx(4 / 5)
-    assert report.mean_precision_at_k == pytest.approx(7 / 15)
+    assert report.recall_at_k == pytest.approx(10 / 11)
+    assert report.mrr == pytest.approx(17 / 22)
+    assert report.mean_precision_at_k == pytest.approx(1 / 2)
     boundary_case = next(
         result
         for result in report.cases
         if result.case_id == "resilience-cross-chunk"
     )
-    assert boundary_case.rank == 1
+    assert boundary_case.rank == 2
 
 
 def test_grouped_evidence_counts_any_member_as_relevant() -> None:
@@ -105,14 +105,36 @@ def test_grouped_evidence_counts_any_member_as_relevant() -> None:
         strategy="grouped",
     )
 
-    assert report.recall_at_k == pytest.approx(9 / 10)
-    assert report.mrr == pytest.approx(4 / 5)
-    assert report.mean_precision_at_k == pytest.approx(31 / 60)
+    assert report.recall_at_k == pytest.approx(10 / 11)
+    assert report.mrr == pytest.approx(17 / 22)
+    assert report.mean_precision_at_k == pytest.approx(17 / 33)
+    boundary_case = next(
+        result
+        for result in report.cases
+        if result.case_id == "resilience-cross-chunk"
+    )
+    assert boundary_case.rank == 2
+    assert boundary_case.returned_count == 2
+    assert boundary_case.precision_at_k == pytest.approx(1 / 2)
+
+
+def test_coverage_reranking_promotes_complete_grouped_evidence() -> None:
+    """Full combined coverage outranks a dense partial-match distractor."""
+
+    project_root = Path(__file__).parents[1]
+
+    report = run_dataset(
+        project_root / "evals" / "retrieval_cases.json",
+        project_root / "evals" / "fixtures",
+        strategy="grouped_reranked",
+    )
+
+    assert report.recall_at_k == pytest.approx(10 / 11)
+    assert report.mrr == pytest.approx(9 / 11)
+    assert report.mean_precision_at_k == pytest.approx(17 / 33)
     boundary_case = next(
         result
         for result in report.cases
         if result.case_id == "resilience-cross-chunk"
     )
     assert boundary_case.rank == 1
-    assert boundary_case.returned_count == 1
-    assert boundary_case.precision_at_k == pytest.approx(1.0)

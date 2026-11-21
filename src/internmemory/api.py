@@ -414,7 +414,11 @@ def search_evidence(
         )
 
     try:
-        groups = service.search(q, limit=limit)
+        groups = service.search(
+            q,
+            limit=limit,
+            rerank_by_coverage=True,
+        )
     except ValueError as error:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,

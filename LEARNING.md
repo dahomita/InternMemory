@@ -56,6 +56,9 @@
 - Batch-loading related rows with one parameterized `IN` query bounds database
   round trips as candidate count grows. Dynamically generated `?` placeholders
   are safe when user values remain separate bound parameters.
+- Group-level reranking can improve result order without changing recall.
+  Combined exact-term coverage promoted complete cross-chunk evidence in the
+  controlled case, but keyword-stuffed text remains a known limitation.
 
 ## Clarifications and Corrections
 

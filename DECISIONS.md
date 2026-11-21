@@ -110,3 +110,15 @@
 - **Decision:** Add `/search/evidence` and preserve `/search/documents`.
 - **Tradeoff:** Two search endpoints require clear naming and documentation,
   but existing clients remain compatible and each response has one shape.
+
+## ADR-014: Rerank evidence groups by exact-term coverage
+
+- **Problem:** BM25 ranks anchor chunks before neighboring evidence is
+  attached, so a dense partial match can outrank a complete multi-chunk group.
+- **Decision:** Order groups by descending combined query-term coverage, then
+  prefer fewer chunks, then preserve candidate order. Do not compare raw BM25
+  scores produced by different AND and OR expressions.
+- **Evidence:** On the 13-case corpus, grouped MRR improved from `0.773` to
+  `0.818`; Recall@5 and measured mean precision@5 remained unchanged.
+- **Tradeoff:** The rule is deterministic and token-aware, but exact coverage
+  can still reward keyword-heavy text without understanding its meaning.

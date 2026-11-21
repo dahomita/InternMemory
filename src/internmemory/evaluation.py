@@ -18,7 +18,13 @@ from internmemory.retrieval_service import RetrievalService
 from internmemory.source_repository import SourceRepository
 
 
-RetrievalStrategy = Literal["all", "any", "prioritized", "grouped"]
+RetrievalStrategy = Literal[
+    "all",
+    "any",
+    "prioritized",
+    "grouped",
+    "grouped_reranked",
+]
 
 
 @dataclass(frozen=True, slots=True)
@@ -145,10 +151,11 @@ def evaluate_cases(
         relevant_ranks: list[int] = []
         started_at = perf_counter_ns()
         try:
-            if strategy == "grouped":
+            if strategy in ("grouped", "grouped_reranked"):
                 groups = retrieval_service.search(
                     case.query,
                     limit=k,
+                    rerank_by_coverage=strategy == "grouped_reranked",
                 )
                 returned_count = len(groups)
                 if not case.expected_no_answer:
@@ -344,7 +351,13 @@ def main() -> None:
     parser.add_argument("--max-chunk-chars", type=int, default=1_200)
     parser.add_argument(
         "--strategy",
-        choices=("all", "any", "prioritized", "grouped"),
+        choices=(
+            "all",
+            "any",
+            "prioritized",
+            "grouped",
+            "grouped_reranked",
+        ),
         default="all",
     )
     arguments = parser.parse_args()

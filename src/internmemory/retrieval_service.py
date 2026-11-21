@@ -28,6 +28,7 @@ class RetrievalService:
         query: str,
         *,
         limit: int = 20,
+        rerank_by_coverage: bool = False,
     ) -> list[EvidenceGroup]:
         """Return deduplicated evidence groups in candidate rank order."""
 
@@ -90,6 +91,14 @@ class RetrievalService:
                     query_term_coverage=(
                         len(covered_terms) / len(query_terms)
                     ),
+                )
+            )
+
+        if rerank_by_coverage:
+            groups.sort(
+                key=lambda group: (
+                    -group.query_term_coverage,
+                    len(group.chunks),
                 )
             )
 

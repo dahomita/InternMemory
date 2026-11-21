@@ -82,6 +82,13 @@
       "query": "circuit breaker retry budget",
       "relevant_source": "resilience-boundary.md",
       "required_text": "A retry budget limits repeated attempts after transient failures."
+    },
+    {
+      "id": "resilience-distractor-control",
+      "category": "distractor_corpus",
+      "query": "synthetic overload drill alarm routing",
+      "relevant_source": "resilience-distractor.md",
+      "required_text": "This fictional synthetic overload drill validates alarm routing"
     }
   ]
 }

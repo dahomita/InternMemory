@@ -172,6 +172,10 @@ def test_evidence_search_returns_coverage_gated_group(
         "A retry budget limits repeated attempts.",
         encoding="utf-8",
     )
+    (source_root / "distractor.md").write_text(
+        "Retry budget circuit. Retry budget circuit.",
+        encoding="utf-8",
+    )
     app = create_app(
         tmp_path / "internmemory.db",
         ingestion_root=source_root,
@@ -183,6 +187,10 @@ def test_evidence_search_returns_coverage_gated_group(
             "/sources/ingest",
             json={"relative_path": "resilience.md"},
         )
+        client.post(
+            "/sources/ingest",
+            json={"relative_path": "distractor.md"},
+        )
         response = client.get(
             "/search/evidence",
             params={"q": "circuit breaker retry budget"},
@@ -190,7 +198,7 @@ def test_evidence_search_returns_coverage_gated_group(
 
     assert response.status_code == 200
     groups = response.json()
-    assert len(groups) == 1
+    assert len(groups) == 2
     assert groups[0]["source"]["locator"] == "resilience.md"
     assert [chunk["ordinal"] for chunk in groups[0]["chunks"]] == [0, 1]
     assert groups[0]["query_term_coverage"] == 1.0

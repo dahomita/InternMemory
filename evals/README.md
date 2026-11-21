@@ -27,6 +27,12 @@ Measure coverage-gated adjacent evidence groups:
 python -m internmemory.evaluation --strategy grouped
 ```
 
+Compare group-level exact-term coverage reranking:
+
+```bash
+python -m internmemory.evaluation --strategy grouped_reranked
+```
+
 Each case identifies a failure category, query, relevant source, and required
 evidence text. A retrieved chunk counts as relevant only when it comes from
 that source and contains the normalized required text. A grouped result counts
