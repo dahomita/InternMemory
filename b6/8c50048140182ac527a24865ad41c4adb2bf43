@@ -1,0 +1,75 @@
+.gitignore
+  s_cfe57713647727::t_8b380c52e45449 17-18
+DECISIONS.md
+  s_cfe57713647727::t_5145bf6c3916e0 53-90
+LEARNING.md
+  s_cfe57713647727::t_27f5976628efad 19-29,45-46
+PROGRESS.md
+  s_cfe57713647727::t_1c2db50e4ee44e 5-6,15-18,22,25-27,31,39-41,47-49
+PROJECT.md
+  s_cfe57713647727::t_6decb91f9ceaf7 30-33
+documents/.gitkeep
+  s_cfe57713647727::t_3edda7e06b1796 1
+evals/README.md
+  s_cfe57713647727::t_bbe9e43ae0f79e 1-18
+evals/fixtures/agent-harness.md
+  s_cfe57713647727::t_d34413f20bae52 1-8
+evals/fixtures/batching.md
+  s_cfe57713647727::t_d17e10da87de40 1-8
+evals/fixtures/sqlite-reliability.md
+  s_cfe57713647727::t_0b62fd258b5601 1-7
+evals/retrieval_cases.json
+  s_cfe57713647727::t_eafd51d78a9f03 1-41
+src/internmemory/api.py
+  s_cfe57713647727::t_233118c66e5e78 18-19,25,34-35,97-122,141-163,331-335,348-383
+src/internmemory/chunk_repository.py
+  s_cfe57713647727::t_58e9c5ce0bcf4f 1-216
+src/internmemory/chunking.py
+  s_cfe57713647727::t_5f69139b814974 1-70
+src/internmemory/database.py
+  s_cfe57713647727::t_d9b793281a2d66 67-137,187-190
+src/internmemory/evaluation.py
+  s_cfe57713647727::t_0823515f158548 1-224
+src/internmemory/ingestion_service.py
+  s_cfe57713647727::t_e2e264dff0cabb 1-88
+src/internmemory/main.py
+  s_cfe57713647727::t_7a0a1863addc8a 11,13,17,22,31-33,39-40,42-48,67,70
+src/internmemory/models.py
+  s_cfe57713647727::t_1479238721a54a 17-23,68-116
+src/internmemory/note_repository.py
+  s_cfe57713647727::t_1c80394f9ca397 10,103,116
+src/internmemory/schemas.py
+  s_cfe57713647727::t_cdcd973ebabdf9 13,51-116
+src/internmemory/search_query.py
+  s_cfe57713647727::t_3e148d5cc6d2ba 1-16
+src/internmemory/source_repository.py
+  s_cfe57713647727::t_e2365e64f8d7e4 1-122
+tests/test_chunking.py
+  s_cfe57713647727::t_f81b9ebcdc98a2 1-36
+tests/test_document_search.py
+  s_cfe57713647727::t_df22d9cd7ff227 1-119
+tests/test_evaluation.py
+  s_cfe57713647727::t_5ba72441bf3dc5 1-26
+tests/test_ingestion.py
+  s_cfe57713647727::t_e0a5da3c6308f3 1-114
+tests/test_search.py
+  s_cfe57713647727::t_aaa04af579a8c1 62,65,82,86-89,94-99
+tests/test_search_query.py
+  s_cfe57713647727::t_8fb8598d2b59ad 1-32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "b68c50048140182ac527a24865ad41c4adb2bf43",
+  "prompts": {},
+  "sessions": {
+    "s_cfe57713647727": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "3c5540e7-abd4-431d-8200-1b40efcb5929",
+        "model": "unknown"
+      },
+      "human_author": "Daho Mita <dahomita17062006@gmail.com>"
+    }
+  }
+}
