@@ -1,0 +1,73 @@
+.cursor/rules/internmemory-mentor.mdc
+  s_cfe57713647727::t_7513c9589a59a9 1-44
+.gitignore
+  s_cfe57713647727::t_dda12ee3eb0742 1-19
+DECISIONS.md
+  s_cfe57713647727::t_9ac9160fb1bff1 1-52
+LEARNING.md
+  s_cfe57713647727::t_c21f3d85baf40e 1-40
+PROGRESS.md
+  s_cfe57713647727::t_81614180fd7c15 1-40
+PROJECT.md
+  s_cfe57713647727::t_d5a285284c92b9 1-52
+README.md
+  s_cfe57713647727::t_f78c8ac1fc7b10 1-30
+pyproject.toml
+  s_cfe57713647727::t_c5f4fd7a5084e2 1-31
+src/internmemory/__init__.py
+  s_cfe57713647727::t_d174d8a7f2745b 1
+src/internmemory/api.py
+  s_cfe57713647727::t_8fd2d8edbc36cc 1-350
+src/internmemory/database.py
+  s_cfe57713647727::t_c403a213ad3149 1-117
+src/internmemory/main.py
+  s_cfe57713647727::t_07dbaa80e74bbc 1-59
+src/internmemory/models.py
+  s_cfe57713647727::t_7d2e56a393410d 1-60
+src/internmemory/note_repository.py
+  s_cfe57713647727::t_6c6e4bea1bdf1a 1-210
+src/internmemory/project_repository.py
+  s_cfe57713647727::t_3c73610d3db5d6 1-84
+src/internmemory/recap_service.py
+  s_cfe57713647727::t_2703660ac17e9d 1-66
+src/internmemory/schemas.py
+  s_cfe57713647727::t_285f5f752b4b6e 1-172
+src/internmemory/task_repository.py
+  s_cfe57713647727::t_2fd6c113b21812 1-171
+tests/test_database.py
+  s_cfe57713647727::t_7a7dab562e0d02 1-107
+tests/test_health.py
+  s_cfe57713647727::t_961a9b9ab7a409 1-18
+tests/test_note_repository.py
+  s_cfe57713647727::t_1051a7d3df6760 1-107
+tests/test_notes_api.py
+  s_cfe57713647727::t_6da28b3b9bf4fd 1-155
+tests/test_project_repository.py
+  s_cfe57713647727::t_7e6aa3c4653a6b 1-38
+tests/test_projects_api.py
+  s_cfe57713647727::t_b4ba8264b5c2da 1-57
+tests/test_recap.py
+  s_cfe57713647727::t_068bbbe17b44d4 1-72
+tests/test_search.py
+  s_cfe57713647727::t_cf0408d5046fd3 1-91
+tests/test_task_repository.py
+  s_cfe57713647727::t_d61aa7a4ab432e 1-46
+tests/test_tasks_api.py
+  s_cfe57713647727::t_feec682b131413 1-86
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "9924f6cd3f7517634d7851b06a9db881a93ce927",
+  "prompts": {},
+  "sessions": {
+    "s_cfe57713647727": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "3c5540e7-abd4-431d-8200-1b40efcb5929",
+        "model": "unknown"
+      },
+      "human_author": "Daho Mita <dahomita17062006@gmail.com>"
+    }
+  }
+}
