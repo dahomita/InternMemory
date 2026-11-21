@@ -20,9 +20,11 @@ from internmemory.ingestion_service import IngestionService
 from internmemory.note_repository import NoteRepository
 from internmemory.project_repository import ProjectRepository
 from internmemory.recap_service import RecapService
+from internmemory.retrieval_service import RetrievalService
 from internmemory.task_repository import TaskRepository
 from internmemory.schemas import (
     DocumentSearchResultResponse,
+    EvidenceGroupResponse,
     HealthResponse,
     MorningRecapResponse,
     NoteCreate,
@@ -117,6 +119,19 @@ def get_chunk_repository(request: Request) -> ChunkRepository:
 ChunkRepositoryDependency = Annotated[
     ChunkRepository,
     Depends(get_chunk_repository),
+]
+
+
+def get_retrieval_service(request: Request) -> RetrievalService:
+    """Return the retrieval service configured for this application."""
+
+    service: RetrievalService = request.app.state.retrieval_service
+    return service
+
+
+RetrievalServiceDependency = Annotated[
+    RetrievalService,
+    Depends(get_retrieval_service),
 ]
 
 
@@ -378,6 +393,42 @@ def search_documents(
     return [
         DocumentSearchResultResponse.model_validate(result)
         for result in results
+    ]
+
+
+@router.get(
+    "/search/evidence",
+    response_model=list[EvidenceGroupResponse],
+)
+def search_evidence(
+    service: RetrievalServiceDependency,
+    q: Annotated[str, Query(min_length=1, max_length=200)],
+    limit: Annotated[int, Query(ge=1, le=100)] = 20,
+) -> list[EvidenceGroupResponse]:
+    """Return grouped evidence with coverage-gated adjacent chunks."""
+
+    if not q.strip():
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="Search query must not be blank",
+        )
+
+    try:
+        groups = service.search(q, limit=limit)
+    except ValueError as error:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail=str(error),
+        ) from error
+    except sqlite3.OperationalError as error:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid search query",
+        ) from error
+
+    return [
+        EvidenceGroupResponse.model_validate(group)
+        for group in groups
     ]
 
 

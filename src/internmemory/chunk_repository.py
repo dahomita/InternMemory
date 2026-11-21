@@ -13,7 +13,7 @@ from internmemory.models import (
     SourceReference,
     SourceType,
 )
-from internmemory.search_query import build_literal_fts_query
+from internmemory.search_query import TermMatch, build_literal_fts_query
 
 
 class ChunkRepository:
@@ -107,15 +107,46 @@ class ChunkRepository:
 
         return [_row_to_chunk(row) for row in rows]
 
+    def list_for_sources(
+        self,
+        source_ids: Sequence[int],
+    ) -> list[SourceChunk]:
+        """Return chunks for multiple sources using one database query."""
+
+        unique_source_ids = tuple(dict.fromkeys(source_ids))
+        if not unique_source_ids:
+            return []
+
+        placeholders = ", ".join("?" for _ in unique_source_ids)
+        connection = connect_database(self._database_path)
+        try:
+            rows = connection.execute(
+                f"""
+                SELECT *
+                FROM source_chunks
+                WHERE source_id IN ({placeholders})
+                ORDER BY source_id ASC, ordinal ASC
+                """,
+                unique_source_ids,
+            ).fetchall()
+        finally:
+            connection.close()
+
+        return [_row_to_chunk(row) for row in rows]
+
     def search(
         self,
         query: str,
         *,
         limit: int = 20,
+        term_match: TermMatch = "all",
     ) -> list[DocumentSearchResult]:
         """Return source chunks ordered by FTS5 BM25 relevance."""
 
-        fts_query = build_literal_fts_query(query)
+        fts_query = build_literal_fts_query(
+            query,
+            term_match=term_match,
+        )
 
         connection = connect_database(self._database_path)
         try:
@@ -150,6 +181,42 @@ class ChunkRepository:
             connection.close()
 
         return [_search_row_to_result(row) for row in rows]
+
+    def search_with_fallback(
+        self,
+        query: str,
+        *,
+        limit: int = 20,
+    ) -> list[DocumentSearchResult]:
+        """Prioritize all-term matches, then fill with any-term matches."""
+
+        strict_results = self.search(
+            query,
+            limit=limit,
+            term_match="all",
+        )
+        if len(strict_results) >= limit:
+            return strict_results
+
+        seen_chunk_ids = {
+            result.chunk.id
+            for result in strict_results
+        }
+        results = list(strict_results)
+        broad_results = self.search(
+            query,
+            limit=limit + len(strict_results),
+            term_match="any",
+        )
+        for result in broad_results:
+            if result.chunk.id in seen_chunk_ids:
+                continue
+            results.append(result)
+            seen_chunk_ids.add(result.chunk.id)
+            if len(results) == limit:
+                break
+
+        return results
 
 
 def _rows_match_drafts(

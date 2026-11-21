@@ -114,6 +114,17 @@ class DocumentSearchResultResponse(BaseModel):
     score: float
 
 
+class EvidenceGroupResponse(BaseModel):
+    """A ranked source passage composed of cited member chunks."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    source: SourceReferenceResponse
+    chunks: tuple[SourceChunkResponse, ...]
+    anchor_score: float
+    query_term_coverage: float = Field(ge=0.0, le=1.0)
+
+
 class TaskCreate(BaseModel):
     """Validated input for creating an engineering task."""
 

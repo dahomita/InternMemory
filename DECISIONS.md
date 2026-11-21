@@ -73,7 +73,8 @@
 
 - **Problem:** Search changes cannot be justified from demonstrations alone.
 - **Decision:** Keep fictional fixture documents and human-labeled evidence
-  cases in Git; report Recall@5, MRR, median latency, and p95 latency.
+  cases in Git; report Recall@5, MRR, no-answer accuracy, median latency, and
+  p95 latency. Answerable and no-answer cases use separate denominators.
 - **Tradeoff:** Initial metrics reflect a very small corpus and must not be
   generalized. Known failures remain visible until a measured change fixes
   them.
@@ -88,3 +89,24 @@
   `0.8333` to `1.0` with essentially unchanged median latency.
 - **Tradeoff:** AND semantics can over-constrain natural-language queries and
   do not address synonyms or semantic mismatch.
+
+## ADR-012: Preserve chunk identity in coverage-gated evidence groups
+
+- **Problem:** Relevant evidence can span adjacent chunks, but attaching every
+  neighbor adds irrelevant context and token cost.
+- **Options:** Always attach neighbors, concatenate synthetic chunks, or attach
+  only same-source neighbors that add missing query terms.
+- **Decision:** Build explicit evidence groups and attach an immediate neighbor
+  only when combined exact query-term coverage improves.
+- **Tradeoff:** Citations and offsets remain accurate and context growth is
+  bounded, but exact-term coverage cannot recognize semantic relationships.
+
+## ADR-013: Add a separate grouped-evidence endpoint
+
+- **Problem:** Grouped results contain multiple chunks and cannot satisfy the
+  existing single-chunk document-search response contract.
+- **Options:** Replace `/search/documents`, add a mode parameter, or add a new
+  endpoint.
+- **Decision:** Add `/search/evidence` and preserve `/search/documents`.
+- **Tradeoff:** Two search endpoints require clear naming and documentation,
+  but existing clients remain compatible and each response has one shape.

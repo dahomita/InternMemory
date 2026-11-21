@@ -117,3 +117,80 @@ def test_document_search_treats_fts_punctuation_as_literal(
 
     assert response.status_code == 200
     assert response.json() == []
+
+
+def test_prioritized_fallback_keeps_strict_matches_first(
+    tmp_path: Path,
+) -> None:
+    """Broad candidates fill capacity without displacing strict matches."""
+
+    source_root = tmp_path / "documents"
+    source_root.mkdir()
+    (source_root / "strict.md").write_text(
+        "alpha beta with supporting context",
+        encoding="utf-8",
+    )
+    (source_root / "partial.md").write_text(
+        "alpha",
+        encoding="utf-8",
+    )
+    app = create_app(
+        tmp_path / "internmemory.db",
+        ingestion_root=source_root,
+    )
+
+    with TestClient(app) as client:
+        client.post(
+            "/sources/ingest",
+            json={"relative_path": "strict.md"},
+        )
+        client.post(
+            "/sources/ingest",
+            json={"relative_path": "partial.md"},
+        )
+        results = app.state.chunk_repository.search_with_fallback(
+            "alpha beta",
+            limit=2,
+        )
+
+    assert [result.source.locator for result in results] == [
+        "strict.md",
+        "partial.md",
+    ]
+    assert len({result.chunk.id for result in results}) == 2
+
+
+def test_evidence_search_returns_coverage_gated_group(
+    tmp_path: Path,
+) -> None:
+    """The evidence API preserves both chunks spanning a query boundary."""
+
+    source_root = tmp_path / "documents"
+    source_root.mkdir()
+    (source_root / "resilience.md").write_text(
+        "A circuit breaker stops repeated dependency calls.\n\n"
+        "A retry budget limits repeated attempts.",
+        encoding="utf-8",
+    )
+    app = create_app(
+        tmp_path / "internmemory.db",
+        ingestion_root=source_root,
+        max_chunk_chars=55,
+    )
+
+    with TestClient(app) as client:
+        client.post(
+            "/sources/ingest",
+            json={"relative_path": "resilience.md"},
+        )
+        response = client.get(
+            "/search/evidence",
+            params={"q": "circuit breaker retry budget"},
+        )
+
+    assert response.status_code == 200
+    groups = response.json()
+    assert len(groups) == 1
+    assert groups[0]["source"]["locator"] == "resilience.md"
+    assert [chunk["ordinal"] for chunk in groups[0]["chunks"]] == [0, 1]
+    assert groups[0]["query_term_coverage"] == 1.0

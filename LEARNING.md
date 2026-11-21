@@ -27,6 +27,35 @@
 - Raw FTS5 syntax can turn punctuation such as hyphens into query operators.
 - Literal query normalization separates user text from FTS5 query syntax and
   should be evaluated against the same fixed ground-truth cases.
+- A lower score after adding harder cases is broader measurement, not a system
+  regression; comparisons require the same dataset.
+- Keyword retrieval cannot infer synonyms or expanded abbreviations without
+  explicit query expansion, indexed terminology, or semantic retrieval.
+- Recall can improve by returning more candidates while precision and context
+  quality worsen; no-answer cases require separate measurement.
+- BM25 can favor a short keyword-dense distractor over a longer source with
+  stronger supporting evidence.
+- Strict AND retrieval fails when required query terms are split across chunks.
+  Neighbor expansion cannot help unless candidate generation first finds an
+  anchor chunk.
+- Candidate generation usually favors recall so later stages have evidence to
+  rerank. Precision measures the relevant fraction of returned results;
+  latency measures retrieval speed.
+- Any-term OR matching improved measured recall but reduced measured
+  precision, demonstrating why broad candidates need strict-match priority or
+  reranking before they become final context.
+- A two-query strict-then-broad fallback makes ordering explicit but increases
+  latency; aggregate retrieval metrics may remain unchanged when BM25 already
+  orders strict matches first.
+- Combined query-term coverage measures the unique query terms present across
+  grouped chunks. Coverage-gated neighbors add context only when they
+  contribute missing exact terms.
+- N+1 queries occur when one initial retrieval is followed by a separate
+  database read per result. Correct grouping improved measured precision, but
+  its first implementation exposed this latency cost.
+- Batch-loading related rows with one parameterized `IN` query bounds database
+  round trips as candidate count grows. Dynamically generated `?` placeholders
+  are safe when user values remain separate bound parameters.
 
 ## Clarifications and Corrections
 

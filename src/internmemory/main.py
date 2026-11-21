@@ -14,6 +14,7 @@ from internmemory.ingestion_service import IngestionService
 from internmemory.note_repository import NoteRepository
 from internmemory.project_repository import ProjectRepository
 from internmemory.recap_service import RecapService
+from internmemory.retrieval_service import RetrievalService
 from internmemory.source_repository import SourceRepository
 from internmemory.task_repository import TaskRepository
 
@@ -52,6 +53,7 @@ def create_app(
         timezone_name=timezone_name,
         now_provider=now_provider,
     )
+    retrieval_service = RetrievalService(chunk_repository)
 
     @asynccontextmanager
     async def lifespan(_: FastAPI) -> AsyncIterator[None]:
@@ -70,6 +72,7 @@ def create_app(
     application.state.ingestion_service = ingestion_service
     application.state.task_repository = task_repository
     application.state.recap_service = recap_service
+    application.state.retrieval_service = retrieval_service
     application.include_router(router)
     return application
 

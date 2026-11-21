@@ -30,6 +30,7 @@ Storage and retrieval remain independent of model providers.
 - Bounded Markdown and text source ingestion with SHA-256 snapshots
 - Deterministic source chunking with exact citation offsets
 - FTS5/BM25 document-chunk retrieval with source citations
+- Strict-first retrieval with broad fallback and coverage-gated evidence groups
 - Versioned fictional retrieval corpus and labeled evaluation runner
 - Temporary-database integration tests
 

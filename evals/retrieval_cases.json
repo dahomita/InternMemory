@@ -3,39 +3,85 @@
   "cases": [
     {
       "id": "batch-tail-latency",
+      "category": "exact_keyword",
       "query": "batching tail latency",
       "relevant_source": "batching.md",
       "required_text": "Waiting for a batch to fill can increase tail latency."
     },
     {
       "id": "batch-throughput-overhead",
+      "category": "punctuation",
       "query": "throughput per-request overhead",
       "relevant_source": "batching.md",
       "required_text": "Larger batches can improve throughput by amortizing per-request overhead."
     },
     {
       "id": "sqlite-wal-concurrency",
+      "category": "exact_keyword",
       "query": "SQLite WAL readers writer",
       "relevant_source": "sqlite-reliability.md",
       "required_text": "SQLite WAL mode allows readers to continue while a writer commits changes."
     },
     {
       "id": "sqlite-lock-contention",
+      "category": "exact_keyword",
       "query": "busy timeout lock contention",
       "relevant_source": "sqlite-reliability.md",
       "required_text": "A busy timeout can reduce immediate failures during temporary lock contention."
     },
     {
       "id": "agent-bounded-loops",
+      "category": "exact_keyword",
       "query": "agent bounded tool calls",
       "relevant_source": "agent-harness.md",
       "required_text": "An agent harness should enforce bounded tool calls"
     },
     {
       "id": "agent-tool-validation",
+      "category": "exact_keyword",
       "query": "tool results schema validation",
       "relevant_source": "agent-harness.md",
       "required_text": "Tool results require schema validation before they enter model context."
+    },
+    {
+      "id": "batch-semantic-paraphrase",
+      "category": "synonym",
+      "query": "bigger request groups slowest responses",
+      "relevant_source": "batching.md",
+      "required_text": "Waiting for a batch to fill can increase tail latency."
+    },
+    {
+      "id": "sqlite-expanded-abbreviation",
+      "category": "abbreviation",
+      "query": "write ahead log concurrent reads",
+      "relevant_source": "sqlite-reliability.md",
+      "required_text": "SQLite WAL mode allows readers to continue while a writer commits changes."
+    },
+    {
+      "id": "web-batching-network-overhead",
+      "category": "distractor_corpus",
+      "query": "frontend analytics network overhead",
+      "relevant_source": "web-request-batching.md",
+      "required_text": "A frontend analytics client uses batching to reduce network overhead."
+    },
+    {
+      "id": "no-answer-encryption",
+      "category": "no_answer",
+      "query": "AES encryption algorithm",
+      "expected_no_answer": true
+    },
+    {
+      "id": "no-answer-kubernetes",
+      "category": "no_answer",
+      "query": "Kubernetes autoscaling replicas",
+      "expected_no_answer": true
+    },
+    {
+      "id": "resilience-cross-chunk",
+      "category": "chunk_boundary",
+      "query": "circuit breaker retry budget",
+      "relevant_source": "resilience-boundary.md",
+      "required_text": "A retry budget limits repeated attempts after transient failures."
     }
   ]
 }

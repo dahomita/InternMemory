@@ -25,6 +25,15 @@ def test_duplicate_terms_are_removed_in_original_order() -> None:
     )
 
 
+def test_any_term_mode_builds_a_literal_or_query() -> None:
+    """Candidate retrieval can match any safe literal term."""
+
+    assert build_literal_fts_query(
+        "circuit breaker retry budget",
+        term_match="any",
+    ) == '"circuit" OR "breaker" OR "retry" OR "budget"'
+
+
 def test_query_requires_at_least_one_searchable_token() -> None:
     """Punctuation-only input is rejected before SQLite."""
 
