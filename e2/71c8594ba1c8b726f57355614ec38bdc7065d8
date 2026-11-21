@@ -1,0 +1,57 @@
+DECISIONS.md
+  s_cfe57713647727::t_a36651c97cc1a6 76-77,92-112
+LEARNING.md
+  s_cfe57713647727::t_8d5df875c2c7ad 30-58
+PROGRESS.md
+  s_cfe57713647727::t_539f3d54ef41b2 22,25-43,45,49,58-59,66-68
+PROJECT.md
+  s_cfe57713647727::t_59126c32a58fb1 33
+README.md
+  s_cfe57713647727::t_2660f5d2179cf9 26-32
+evals/README.md
+  s_cfe57713647727::t_9256279d33a030 12-42
+evals/fixtures/resilience-boundary.md
+  s_cfe57713647727::t_0995eaef9de81f 1-20
+evals/fixtures/web-request-batching.md
+  s_cfe57713647727::t_b12fb3f9b035b4 1-5
+evals/retrieval_cases.json
+  s_cfe57713647727::t_956e216c76d36b 6,13,20,27,34,41,45-84
+src/internmemory/api.py
+  s_cfe57713647727::t_1f921b4098a512 23,27,125-137,399-434
+src/internmemory/chunk_repository.py
+  s_cfe57713647727::t_4d1409182e8c54 16,110-136,142,146-149,185-220
+src/internmemory/evaluation.py
+  s_cfe57713647727::t_cb8d899ffa9ac8 12,17,21-23,29,31-33,41-42,45-47,57-58,62-63,85,87-92,94,101,106-122,133,142,145,148-196,199,203-214,218-219,222-224,230-242,246-247,250-265,278,294-298,302-307,345-349,357
+src/internmemory/main.py
+  s_cfe57713647727::t_8156555d75a3d2 17,56,75
+src/internmemory/retrieval_service.py
+  s_cfe57713647727::t_4446c9553345fa 1-105
+src/internmemory/schemas.py
+  s_cfe57713647727::t_e0dd9ef3a5803f 117-127
+src/internmemory/search_query.py
+  s_cfe57713647727::t_af9376426993ba 4,8,11-12,14-29,32-33,35-36
+tests/test_document_search.py
+  s_cfe57713647727::t_2e6d261b13cf0b 120-196
+tests/test_evaluation.py
+  s_cfe57713647727::t_af7e10697cf0f5 20-47,51-118
+tests/test_retrieval_service.py
+  s_cfe57713647727::t_8ad7cd253bb224 1-81
+tests/test_search_query.py
+  s_cfe57713647727::t_67c1adcfc68d8e 28-36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "e271c8594ba1c8b726f57355614ec38bdc7065d8",
+  "prompts": {},
+  "sessions": {
+    "s_cfe57713647727": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "3c5540e7-abd4-431d-8200-1b40efcb5929",
+        "model": "unknown"
+      },
+      "human_author": "Daho Mita <dahomita17062006@gmail.com>"
+    }
+  }
+}
