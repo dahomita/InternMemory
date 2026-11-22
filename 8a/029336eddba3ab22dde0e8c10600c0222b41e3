@@ -1,0 +1,43 @@
+DECISIONS.md
+  s_cfe57713647727::t_ca0d0ec79c45bf 125-136
+LEARNING.md
+  s_cfe57713647727::t_7d12722209b837 62-67
+PROGRESS.md
+  s_cfe57713647727::t_0fd53f2f1b5a60 22,25-27,31,33-34,39-47,57,74-76
+evals/README.md
+  s_cfe57713647727::t_67ea9d2d225f4e 36-42
+evals/fixtures/cache-reliability.md
+  s_cfe57713647727::t_8c9fd21a1bc7f5 1-11
+evals/fixtures/queue-backpressure.md
+  s_cfe57713647727::t_5a858656b9bb18 1-10
+evals/fixtures/trace-observability.md
+  s_cfe57713647727::t_18aa698dae008c 1-10
+evals/retrieval_cases.json
+  s_cfe57713647727::t_465f5ed0902960 92-139
+src/internmemory/api.py
+  s_cfe57713647727::t_8efe36124b9c4a 421
+src/internmemory/evaluation.py
+  s_cfe57713647727::t_7db41f29824be4 27,155-159,163-172,374
+src/internmemory/retrieval_service.py
+  s_cfe57713647727::t_0e46618dfacfc0 32,36-38,101-105
+tests/test_document_search.py
+  s_cfe57713647727::t_1b2e85b7f8c02d 205-234
+tests/test_evaluation.py
+  s_cfe57713647727::t_8be068192c1ee4 20-25,36-38,67-70,90-93,113-116,123-124,138-141,148-178
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8a029336eddba3ab22dde0e8c10600c0222b41e3",
+  "prompts": {},
+  "sessions": {
+    "s_cfe57713647727": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "3c5540e7-abd4-431d-8200-1b40efcb5929",
+        "model": "unknown"
+      },
+      "human_author": "Daho Mita <dahomita17062006@gmail.com>"
+    }
+  }
+}
