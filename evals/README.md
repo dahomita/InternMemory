@@ -33,6 +33,13 @@ Compare group-level exact-term coverage reranking:
 python -m internmemory.evaluation --strategy grouped_reranked
 ```
 
+Measure grounded keyword retrieval with a 50% coverage threshold:
+
+```bash
+python -m internmemory.evaluation \
+  --strategy grouped_reranked_thresholded
+```
+
 Each case identifies a failure category, query, relevant source, and required
 evidence text. A retrieved chunk counts as relevant only when it comes from
 that source and contains the normalized required text. A grouped result counts

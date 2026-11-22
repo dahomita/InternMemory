@@ -89,6 +89,54 @@
       "query": "synthetic overload drill alarm routing",
       "relevant_source": "resilience-distractor.md",
       "required_text": "This fictional synthetic overload drill validates alarm routing"
+    },
+    {
+      "id": "cache-stampede-control",
+      "category": "exact_keyword",
+      "query": "cache stampede request coalescing",
+      "relevant_source": "cache-reliability.md",
+      "required_text": "A cache stampede occurs when many workers recompute the same expired value at once."
+    },
+    {
+      "id": "cache-stampede-paraphrase",
+      "category": "semantic_paraphrase",
+      "query": "many processes rebuild an old item simultaneously",
+      "relevant_source": "cache-reliability.md",
+      "required_text": "A cache stampede occurs when many workers recompute the same expired value at once."
+    },
+    {
+      "id": "queue-backpressure-control",
+      "category": "exact_keyword",
+      "query": "bounded queue backpressure producers consumers",
+      "relevant_source": "queue-backpressure.md",
+      "required_text": "A bounded queue applies backpressure when producers outpace consumers."
+    },
+    {
+      "id": "queue-backpressure-paraphrase",
+      "category": "semantic_paraphrase",
+      "query": "incoming work arrives faster than processing capacity",
+      "relevant_source": "queue-backpressure.md",
+      "required_text": "A bounded queue applies backpressure when producers outpace consumers."
+    },
+    {
+      "id": "trace-context-control",
+      "category": "exact_keyword",
+      "query": "distributed trace parent span identifier",
+      "relevant_source": "trace-observability.md",
+      "required_text": "Trace context carries a trace identifier and parent span identifier"
+    },
+    {
+      "id": "trace-context-paraphrase",
+      "category": "semantic_paraphrase",
+      "query": "connect request records between multiple services",
+      "relevant_source": "trace-observability.md",
+      "required_text": "A distributed trace follows one request across service boundaries."
+    },
+    {
+      "id": "no-answer-cache-encryption",
+      "category": "partial_overlap_no_answer",
+      "query": "cache encryption key rotation",
+      "expected_no_answer": true
     }
   ]
 }

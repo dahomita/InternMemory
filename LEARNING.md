@@ -59,6 +59,12 @@
 - Group-level reranking can improve result order without changing recall.
   Combined exact-term coverage promoted complete cross-chunk evidence in the
   controlled case, but keyword-stuffed text remains a known limitation.
+- A small evaluation set can hide failure modes and encourage overfitting.
+  Adding paraphrases and partial-overlap no-answer cases exposed both semantic
+  misses and broad-fallback false positives.
+- Grounded retrieval should abstain when evidence is too weak. A lexical
+  coverage threshold improved precision and no-answer behavior but sacrificed
+  paraphrase recall, making the semantic-search requirement measurable.
 
 ## Clarifications and Corrections
 

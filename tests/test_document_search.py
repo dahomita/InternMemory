@@ -202,3 +202,33 @@ def test_evidence_search_returns_coverage_gated_group(
     assert groups[0]["source"]["locator"] == "resilience.md"
     assert [chunk["ordinal"] for chunk in groups[0]["chunks"]] == [0, 1]
     assert groups[0]["query_term_coverage"] == 1.0
+
+
+def test_evidence_search_abstains_from_weak_partial_overlap(
+    tmp_path: Path,
+) -> None:
+    """One shared term is insufficient evidence for a grounded answer."""
+
+    source_root = tmp_path / "documents"
+    source_root.mkdir()
+    (source_root / "cache.md").write_text(
+        "A cache stampede occurs when many workers refresh an expired value.",
+        encoding="utf-8",
+    )
+    app = create_app(
+        tmp_path / "internmemory.db",
+        ingestion_root=source_root,
+    )
+
+    with TestClient(app) as client:
+        client.post(
+            "/sources/ingest",
+            json={"relative_path": "cache.md"},
+        )
+        response = client.get(
+            "/search/evidence",
+            params={"q": "cache encryption key rotation"},
+        )
+
+    assert response.status_code == 200
+    assert response.json() == []

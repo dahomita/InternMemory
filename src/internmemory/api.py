@@ -418,6 +418,7 @@ def search_evidence(
             q,
             limit=limit,
             rerank_by_coverage=True,
+            minimum_coverage=0.5,
         )
     except ValueError as error:
         raise HTTPException(

@@ -122,3 +122,15 @@
   `0.818`; Recall@5 and measured mean precision@5 remained unchanged.
 - **Tradeoff:** The rule is deterministic and token-aware, but exact coverage
   can still reward keyword-heavy text without understanding its meaning.
+
+## ADR-015: Abstain below minimum lexical evidence coverage
+
+- **Problem:** Broad OR fallback returned a cache document for an unsupported
+  encryption query because one of four query terms matched.
+- **Decision:** `/search/evidence` requires evidence groups to cover at least
+  50% of unique query terms after grouping.
+- **Evidence:** On the 20-case corpus, measured mean precision improved from
+  `0.394` to `0.588` and no-answer accuracy from `0.667` to `1.0`; Recall@5
+  decreased from `0.941` to `0.706`.
+- **Tradeoff:** The endpoint now abstains safely from weak lexical evidence,
+  but semantic retrieval is required to recover paraphrases and synonyms.

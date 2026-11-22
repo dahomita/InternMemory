@@ -29,8 +29,12 @@ class RetrievalService:
         *,
         limit: int = 20,
         rerank_by_coverage: bool = False,
+        minimum_coverage: float = 0.0,
     ) -> list[EvidenceGroup]:
         """Return deduplicated evidence groups in candidate rank order."""
+
+        if not 0.0 <= minimum_coverage <= 1.0:
+            raise ValueError("minimum_coverage must be between 0 and 1")
 
         query_terms = set(extract_literal_terms(query))
         if not query_terms:
@@ -94,6 +98,11 @@ class RetrievalService:
                 )
             )
 
+        groups = [
+            group
+            for group in groups
+            if group.query_term_coverage >= minimum_coverage
+        ]
         if rerank_by_coverage:
             groups.sort(
                 key=lambda group: (

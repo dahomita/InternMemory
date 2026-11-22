@@ -24,6 +24,7 @@ RetrievalStrategy = Literal[
     "prioritized",
     "grouped",
     "grouped_reranked",
+    "grouped_reranked_thresholded",
 ]
 
 
@@ -151,11 +152,24 @@ def evaluate_cases(
         relevant_ranks: list[int] = []
         started_at = perf_counter_ns()
         try:
-            if strategy in ("grouped", "grouped_reranked"):
+            if strategy in (
+                "grouped",
+                "grouped_reranked",
+                "grouped_reranked_thresholded",
+            ):
                 groups = retrieval_service.search(
                     case.query,
                     limit=k,
-                    rerank_by_coverage=strategy == "grouped_reranked",
+                    rerank_by_coverage=strategy
+                    in (
+                        "grouped_reranked",
+                        "grouped_reranked_thresholded",
+                    ),
+                    minimum_coverage=(
+                        0.5
+                        if strategy == "grouped_reranked_thresholded"
+                        else 0.0
+                    ),
                 )
                 returned_count = len(groups)
                 if not case.expected_no_answer:
@@ -357,6 +371,7 @@ def main() -> None:
             "prioritized",
             "grouped",
             "grouped_reranked",
+            "grouped_reranked_thresholded",
         ),
         default="all",
     )
