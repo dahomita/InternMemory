@@ -1,0 +1,33 @@
+DECISIONS.md
+  s_cfe57713647727::t_4427e6344b60a3 167-176
+LEARNING.md
+  s_cfe57713647727::t_f0926670d7587f 81-83
+PROGRESS.md
+  s_cfe57713647727::t_61e674eb1b0874 22,25-27,33-34,39-42,45-46,54-57,63
+evals/README.md
+  s_cfe57713647727::t_1b304f29b12b47 47-53
+evals/retrieval_cases.json
+  s_cfe57713647727::t_88a4671d8bf524 7,15,23,31,39,47,55,63,71,79,86,93,101,109,117,125,133,141,149,157,160-188
+src/internmemory/evaluation.py
+  s_cfe57713647727::t_bc3d2bb52e0e3e 29,38,95,116-117,315,319-324,338,399-402,411
+src/internmemory/semantic_evaluation.py
+  s_cfe57713647727::t_4ac8e981ff42eb 14,104,108-113,128,179-182,196
+tests/test_evaluation.py
+  s_cfe57713647727::t_2f7b924a3a812c 20-25,67-70,90-93,113-116,138-141,168-170,179-198
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c080964ed47d529f3ee13bfdef961990a22bcbd4",
+  "prompts": {},
+  "sessions": {
+    "s_cfe57713647727": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "3c5540e7-abd4-431d-8200-1b40efcb5929",
+        "model": "unknown"
+      },
+      "human_author": "Daho Mita <dahomita17062006@gmail.com>"
+    }
+  }
+}
