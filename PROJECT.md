@@ -31,6 +31,8 @@ Storage and retrieval remain independent of model providers.
 - Deterministic source chunking with exact citation offsets
 - FTS5/BM25 document-chunk retrieval with source citations
 - Strict-first retrieval with broad fallback and coverage-gated evidence groups
+- Optional model-independent embedding provider with local CPU inference
+- Exact in-memory semantic retrieval and comparable evaluation reporting
 - Versioned fictional retrieval corpus and labeled evaluation runner
 - Temporary-database integration tests
 

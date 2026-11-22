@@ -40,6 +40,12 @@ python -m internmemory.evaluation \
   --strategy grouped_reranked_thresholded
 ```
 
+Run the local BGE semantic baseline after installing the `semantic` extra:
+
+```bash
+python -m internmemory.semantic_evaluation
+```
+
 Each case identifies a failure category, query, relevant source, and required
 evidence text. A retrieved chunk counts as relevant only when it comes from
 that source and contains the normalized required text. A grouped result counts

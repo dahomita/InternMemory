@@ -19,7 +19,7 @@ includes:
 
 ## Verification
 
-- Last full test run: `53 passed in 1.21s`
+- Last full test run: `58 passed in 1.16s`
 - IDE diagnostics: no lint errors
 - Local SQLite version tested: `3.40.1` with FTS5 support
 - Expanded 20-case strict baseline: Recall@5 `0.647`, MRR `0.618`,
@@ -49,12 +49,18 @@ includes:
   grouped median latency from `1.37 ms` to `0.99 ms`
 - `/search/evidence` exposes grouped chunks without changing the existing
   `/search/documents` response contract
+- Optional FastEmbed adapter verified with local
+  `BAAI/bge-small-en-v1.5` query and passage embeddings (384 dimensions)
+- In-memory BGE baseline on 20 cases: Recall@5 `1.0`, MRR `0.840`, measured
+  mean precision@5 `0.200`, no-answer accuracy `0.0`
+- Sample semantic query latency: median `3.45 ms`, p95 `4.05 ms`; passage
+  indexing time is excluded
 - Prior raw-syntax baseline: Recall@5 `0.8333`, MRR `0.8333`
 - Sample expanded-run latency: median `0.290 ms`, p95 `0.346 ms`
 
 ## Current Task
 
-Research a small local embedding baseline to recover semantic failures.
+Design semantic no-answer calibration without tuning on evaluation answers.
 
 ## Known Limitations
 
@@ -71,7 +77,7 @@ Research a small local embedding baseline to recover semantic failures.
 
 ## Next Steps
 
-1. Select a small local embedding model and document resource costs.
-2. Add representative public-document cases.
-3. Implement semantic retrieval behind an explicit interface.
-4. Compare keyword, semantic, and hybrid retrieval on the fixed dataset.
+1. Separate calibration and final-evaluation cases.
+2. Calibrate semantic abstention on the calibration split.
+3. Add representative public-document cases.
+4. Compare keyword, semantic, and hybrid retrieval on held-out cases.

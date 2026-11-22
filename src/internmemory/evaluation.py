@@ -248,6 +248,16 @@ def evaluate_cases(
             )
         )
 
+    return summarize_case_results(case_results, k=k)
+
+
+def summarize_case_results(
+    case_results: list[CaseResult],
+    *,
+    k: int,
+) -> EvaluationReport:
+    """Aggregate comparable retrieval metrics from per-case results."""
+
     answerable_results = [
         result
         for result in case_results

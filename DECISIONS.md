@@ -134,3 +134,33 @@
   decreased from `0.941` to `0.706`.
 - **Tradeoff:** The endpoint now abstains safely from weak lexical evidence,
   but semantic retrieval is required to recover paraphrases and synonyms.
+
+## ADR-016: Use FastEmbed with BGE-small as the semantic baseline
+
+- **Problem:** Semantic retrieval needs a local, affordable embedding model
+  without coupling core retrieval code to one library.
+- **Options:** Sentence Transformers with MiniLM, Model2Vec static retrieval,
+  or FastEmbed with `BAAI/bge-small-en-v1.5`.
+- **Decision:** Add FastEmbed as an optional dependency behind an
+  `EmbeddingProvider` interface and begin with BGE-small on CPU.
+- **Evidence:** FastEmbed lists a quantized model size of about 67 MB; the
+  model produces 384-dimensional vectors, accepts up to 512 tokens, and is
+  MIT-licensed. Local query and passage smoke tests succeeded.
+- **Tradeoff:** ONNX avoids PyTorch and API charges, but adds local model
+  downloads, CPU work, cache management, and several package dependencies.
+- **References:** [FastEmbed supported models](https://qdrant.github.io/fastembed/examples/Supported_Models/),
+  [BGE model card](https://huggingface.co/BAAI/bge-small-en-v1.5).
+
+## ADR-017: Start semantic evaluation with brute-force in-memory search
+
+- **Problem:** We need a trustworthy semantic baseline before committing to a
+  persistent vector format or approximate-nearest-neighbor index.
+- **Options:** A vector database/extension, a persistent custom index, or
+  cached passage vectors scanned in memory.
+- **Decision:** Embed the small fixture corpus once and rank every passage by
+  cosine similarity for each query.
+- **Evidence:** BGE retrieved all labeled evidence in the 20-case corpus with
+  MRR `0.840`; one sample measured median query latency at `3.45 ms`.
+- **Tradeoff:** The implementation is simple and exact, but search cost grows
+  linearly with chunks, vectors are rebuilt per run, and no-answer queries
+  require separately calibrated abstention.

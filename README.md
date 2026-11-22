@@ -14,6 +14,12 @@ python -m pip install --upgrade pip
 python -m pip install -e ".[dev]"
 ```
 
+Install the optional local semantic-search dependencies:
+
+```bash
+python -m pip install -e ".[dev,semantic]"
+```
+
 ## Run the API
 
 ```bash

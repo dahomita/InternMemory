@@ -18,6 +18,9 @@ dev = [
     "httpx2>=2,<3",
     "pytest>=8,<10",
 ]
+semantic = [
+    "fastembed>=0.9,<1.0",
+]
 
 [tool.setuptools.packages.find]
 where = ["src"]

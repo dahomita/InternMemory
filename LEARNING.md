@@ -65,6 +65,19 @@
 - Grounded retrieval should abstain when evidence is too weak. A lexical
   coverage threshold improved precision and no-answer behavior but sacrificed
   paraphrase recall, making the semantic-search requirement measurable.
+- Embedding models map queries and passages into a shared vector space so
+  semantic similarity can recover different wording. Query and passage
+  encoding may be asymmetric and should remain explicit in the provider
+  interface.
+- Local ONNX inference avoids API cost and PyTorch, but still introduces model
+  downloads, dependencies, CPU latency, vector storage, and model-version
+  reproducibility concerns.
+- Brute-force semantic retrieval embeds passages once, embeds each query, and
+  compares it with every cached passage vector using cosine similarity. This
+  is transparent for a small corpus but scales linearly with chunk count.
+- Vector search always has a nearest neighbor even when no answer exists.
+  Semantic retrieval therefore needs separately calibrated abstention rather
+  than treating the top result as automatically relevant.
 
 ## Clarifications and Corrections
 
