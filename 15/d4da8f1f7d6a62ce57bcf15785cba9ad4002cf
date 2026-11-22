@@ -1,0 +1,67 @@
+DECISIONS.md
+  s_cfe57713647727::t_991dd1e51fa077 172-174,177-227
+LEARNING.md
+  s_cfe57713647727::t_1af629f484a807 84-98
+PROGRESS.md
+  s_cfe57713647727::t_1c6882a78fcb77 5,18-19,23,26-39,43,55-59,65-68
+PROJECT.md
+  s_cfe57713647727::t_7347d6e66c4f77 14-18,20,39-40,55-56
+README.md
+  s_cfe57713647727::t_15dfa74b45a2a6 39-55
+evals/README.md
+  s_cfe57713647727::t_6c79ca597915b0 53,55-66
+evals/fixtures/database-indexes.md
+  s_cfe57713647727::t_1c3b5069b435ce 1-9
+evals/fixtures/deployment-rollout.md
+  s_cfe57713647727::t_32a270ccdf80b1 1-9
+evals/fixtures/rate-limiting.md
+  s_cfe57713647727::t_727b8a662dd35a 1-9
+evals/retrieval_cases.json
+  s_cfe57713647727::t_ed5216eeec6457 15,23,47,63,86,101,117,125,149,164,172,186,189-281
+pyproject.toml
+  s_cfe57713647727::t_b488fd03555c0f 12
+src/internmemory/api.py
+  s_cfe57713647727::t_d93bc47a05998d 22-24,39,116-132,200-222
+src/internmemory/evaluation.py
+  s_cfe57713647727::t_11626fa02234c9 29,116-120,405
+src/internmemory/hybrid_evaluation.py
+  s_cfe57713647727::t_14d119997da2f2 1-148
+src/internmemory/hybrid_retrieval.py
+  s_cfe57713647727::t_5c5d1a44bc2f78 1-124
+src/internmemory/main.py
+  s_cfe57713647727::t_eb22ddcc565e90 16-18,28-32,43,66-76,96
+src/internmemory/public_ingestion_service.py
+  s_cfe57713647727::t_81281914fa7c6b 1-236
+src/internmemory/schemas.py
+  s_cfe57713647727::t_fd01dcb34f0bd0 66-80
+src/internmemory/semantic_evaluation.py
+  s_cfe57713647727::t_814eb152e14b22 5,7,32-40,106-158,177-228,261,289-293,296,304-323
+src/internmemory/semantic_retrieval.py
+  s_cfe57713647727::t_cb37fcd4312da3 109-110
+tests/test_evaluation.py
+  s_cfe57713647727::t_4329f23d14f787 20-25,39-43,72-75,95-98,118-121,128-129,143-146,173-174,198
+tests/test_hybrid_evaluation.py
+  s_cfe57713647727::t_50e8ab9c77dbf7 1-75
+tests/test_hybrid_retrieval.py
+  s_cfe57713647727::t_009889fd9a8bd9 1-82
+tests/test_public_ingestion.py
+  s_cfe57713647727::t_c5f29a36d03ae1 1-204
+tests/test_semantic_evaluation.py
+  s_cfe57713647727::t_dfd20e89f529fb 10-13,57,65,85-95
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "15d4da8f1f7d6a62ce57bcf15785cba9ad4002cf",
+  "prompts": {},
+  "sessions": {
+    "s_cfe57713647727": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "3c5540e7-abd4-431d-8200-1b40efcb5929",
+        "model": "unknown"
+      },
+      "human_author": "Daho Mita <dahomita17062006@gmail.com>"
+    }
+  }
+}
