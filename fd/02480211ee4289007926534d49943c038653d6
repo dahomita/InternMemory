@@ -1,0 +1,61 @@
+.env.example
+  s_cfe57713647727::t_f53e7b5e68dadd 1-2
+DECISIONS.md
+  s_cfe57713647727::t_8823c4cb4168e2 228-293
+LEARNING.md
+  s_cfe57713647727::t_bcc4bdfe5f1d8c 99-236,254
+PROGRESS.md
+  s_cfe57713647727::t_b359afb0e5066a 20-32,36,53-103,107-111,129-140,144-147
+README.md
+  s_cfe57713647727::t_334ac33e6f1e1e 61-100
+evals/README.md
+  s_cfe57713647727::t_c7401db7776387 86-100
+evals/agent_cases.json
+  s_cfe57713647727::t_6dc3b870c34d8e 1-90
+src/internmemory/agent_evaluation.py
+  s_cfe57713647727::t_ce1603fcf330a9 1-475
+src/internmemory/agent_models.py
+  s_cfe57713647727::t_40266774c9e672 1-212
+src/internmemory/agent_runner.py
+  s_cfe57713647727::t_df15a550f310f6 1-323
+src/internmemory/agent_tools.py
+  s_cfe57713647727::t_fa7d5e33268add 1-85
+src/internmemory/groq_evaluation.py
+  s_cfe57713647727::t_b023a639805c24 1-296
+src/internmemory/groq_provider.py
+  s_cfe57713647727::t_e2ebd4c0b2b934 1-573
+src/internmemory/model_provider.py
+  s_cfe57713647727::t_cfeb34b9730b2a 1-49
+src/internmemory/tool_registry.py
+  s_cfe57713647727::t_2b6575278f5365 1-163
+tests/test_agent_evaluation.py
+  s_cfe57713647727::t_bcf74fdf801c7a 1-401
+tests/test_agent_models.py
+  s_cfe57713647727::t_8105e9dc2a50f5 1-159
+tests/test_agent_runner.py
+  s_cfe57713647727::t_1899751a98c251 1-216
+tests/test_agent_tools.py
+  s_cfe57713647727::t_3570d170b4b9a4 1-207
+tests/test_groq_evaluation.py
+  s_cfe57713647727::t_ea1fb3d7aa8c8a 1-208
+tests/test_groq_provider.py
+  s_cfe57713647727::t_69ef20772f3aa8 1-490
+tests/test_tool_registry.py
+  s_cfe57713647727::t_a61026f09e9697 1-142
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "fd02480211ee4289007926534d49943c038653d6",
+  "prompts": {},
+  "sessions": {
+    "s_cfe57713647727": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "3c5540e7-abd4-431d-8200-1b40efcb5929",
+        "model": "unknown"
+      },
+      "human_author": "Daho Mita <dahomita17062006@gmail.com>"
+    }
+  }
+}
