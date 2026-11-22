@@ -1,0 +1,45 @@
+DECISIONS.md
+  s_cfe57713647727::t_0b9783c8ba3516 137-166
+LEARNING.md
+  s_cfe57713647727::t_3ab5a93ae879db 68-80
+PROGRESS.md
+  s_cfe57713647727::t_58b039e537a0ff 22,52-57,63,80-83
+PROJECT.md
+  s_cfe57713647727::t_815cc5914e89e9 34-35
+README.md
+  s_cfe57713647727::t_7c36ac0561f3d8 17-22
+evals/README.md
+  s_cfe57713647727::t_33f57e2ead1c3a 43-48
+pyproject.toml
+  s_cfe57713647727::t_70cbdf623ee892 21-23
+src/internmemory/embedding.py
+  s_cfe57713647727::t_7bdea52e389dd1 1-99
+src/internmemory/evaluation.py
+  s_cfe57713647727::t_11cee92cf35ff6 251-260
+src/internmemory/semantic_evaluation.py
+  s_cfe57713647727::t_d52bf33d474d53 1-190
+src/internmemory/semantic_retrieval.py
+  s_cfe57713647727::t_d713b8b22b618b 1-109
+tests/test_embedding.py
+  s_cfe57713647727::t_570477194506d3 1-71
+tests/test_semantic_evaluation.py
+  s_cfe57713647727::t_846d640dd1d6b9 1-79
+tests/test_semantic_retrieval.py
+  s_cfe57713647727::t_aa32af06dd0700 1-120
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "7612797e750418d9943482846d886f64d4178f3e",
+  "prompts": {},
+  "sessions": {
+    "s_cfe57713647727": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "3c5540e7-abd4-431d-8200-1b40efcb5929",
+        "model": "unknown"
+      },
+      "human_author": "Daho Mita <dahomita17062006@gmail.com>"
+    }
+  }
+}
