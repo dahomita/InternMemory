@@ -26,6 +26,7 @@ RetrievalStrategy = Literal[
     "grouped_reranked",
     "grouped_reranked_thresholded",
 ]
+CaseSplit = Literal["calibration", "evaluation"]
 
 
 @dataclass(frozen=True, slots=True)
@@ -34,6 +35,7 @@ class RetrievalCase:
 
     case_id: str
     category: str
+    split: CaseSplit
     query: str
     relevant_source: str | None
     required_text: str | None
@@ -90,6 +92,7 @@ def load_cases(dataset_path: str | Path) -> list[RetrievalCase]:
             case = RetrievalCase(
                 case_id=raw_case["id"],
                 category=raw_case["category"],
+                split=raw_case.get("split", "evaluation"),
                 query=raw_case["query"],
                 relevant_source=raw_case.get("relevant_source"),
                 required_text=raw_case.get("required_text"),
@@ -110,6 +113,8 @@ def load_cases(dataset_path: str | Path) -> list[RetrievalCase]:
             )
         ):
             raise ValueError("evaluation case values must not be blank")
+        if case.split not in ("calibration", "evaluation"):
+            raise ValueError("unsupported evaluation case split")
         if case.expected_no_answer:
             if (
                 case.relevant_source is not None
@@ -307,10 +312,16 @@ def run_dataset(
     k: int = 5,
     max_chunk_chars: int = 1_200,
     strategy: RetrievalStrategy = "all",
+    split: CaseSplit | None = None,
 ) -> EvaluationReport:
     """Ingest fixture sources into a temporary database and evaluate them."""
 
-    cases = load_cases(dataset_path)
+    all_cases = load_cases(dataset_path)
+    cases = [
+        case
+        for case in all_cases
+        if split is None or case.split == split
+    ]
     with tempfile.TemporaryDirectory() as temporary_directory:
         database_path = Path(temporary_directory) / "evaluation.db"
         initialize_database(database_path)
@@ -324,7 +335,7 @@ def run_dataset(
         for locator in sorted(
             {
                 case.relevant_source
-                for case in cases
+                for case in all_cases
                 if case.relevant_source is not None
             }
         ):
@@ -385,6 +396,10 @@ def main() -> None:
         ),
         default="all",
     )
+    parser.add_argument(
+        "--split",
+        choices=("calibration", "evaluation"),
+    )
     arguments = parser.parse_args()
 
     report = run_dataset(
@@ -393,6 +408,7 @@ def main() -> None:
         k=arguments.k,
         max_chunk_chars=arguments.max_chunk_chars,
         strategy=arguments.strategy,
+        split=arguments.split,
     )
     print(json.dumps(asdict(report), indent=2))
 

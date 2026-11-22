@@ -46,6 +46,13 @@ Run the local BGE semantic baseline after installing the `semantic` extra:
 python -m internmemory.semantic_evaluation
 ```
 
+Select one deterministic query split while retaining the complete corpus:
+
+```bash
+python -m internmemory.semantic_evaluation --split calibration
+python -m internmemory.semantic_evaluation --split evaluation
+```
+
 Each case identifies a failure category, query, relevant source, and required
 evidence text. A retrieved chunk counts as relevant only when it comes from
 that source and contains the normalized required text. A grouped result counts

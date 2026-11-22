@@ -164,3 +164,13 @@
 - **Tradeoff:** The implementation is simple and exact, but search cost grows
   linearly with chunks, vectors are rebuilt per run, and no-answer queries
   require separately calibrated abstention.
+
+## ADR-018: Separate threshold calibration from held-out evaluation
+
+- **Problem:** Selecting a similarity threshold on the same cases used for the
+  final report would leak answers into the design and overstate quality.
+- **Decision:** Version deterministic `calibration` and `evaluation` labels.
+  Each split contains 9 answerable and 3 no-answer queries, and both search the
+  same complete fixture corpus.
+- **Tradeoff:** The split is transparent and reproducible, but 12 queries per
+  side remain too few for production conclusions and should grow by category.

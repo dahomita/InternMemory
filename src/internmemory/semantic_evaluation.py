@@ -11,6 +11,7 @@ from internmemory.chunk_repository import ChunkRepository
 from internmemory.database import initialize_database
 from internmemory.embedding import EmbeddingProvider, FastEmbedProvider
 from internmemory.evaluation import (
+    CaseSplit,
     CaseResult,
     EvaluationReport,
     RetrievalCase,
@@ -100,10 +101,16 @@ def run_semantic_dataset(
     k: int = 5,
     max_chunk_chars: int = 1_200,
     minimum_similarity: float | None = None,
+    split: CaseSplit | None = None,
 ) -> EvaluationReport:
     """Build a temporary cited corpus and evaluate semantic retrieval."""
 
-    cases = load_cases(dataset_path)
+    all_cases = load_cases(dataset_path)
+    cases = [
+        case
+        for case in all_cases
+        if split is None or case.split == split
+    ]
     with tempfile.TemporaryDirectory() as temporary_directory:
         database_path = Path(temporary_directory) / "evaluation.db"
         initialize_database(database_path)
@@ -118,7 +125,7 @@ def run_semantic_dataset(
         for locator in sorted(
             {
                 case.relevant_source
-                for case in cases
+                for case in all_cases
                 if case.relevant_source is not None
             }
         ):
@@ -169,6 +176,10 @@ def main() -> None:
     parser.add_argument("--k", type=int, default=5)
     parser.add_argument("--max-chunk-chars", type=int, default=1_200)
     parser.add_argument("--minimum-similarity", type=float)
+    parser.add_argument(
+        "--split",
+        choices=("calibration", "evaluation"),
+    )
     arguments = parser.parse_args()
 
     provider = FastEmbedProvider(
@@ -182,6 +193,7 @@ def main() -> None:
         k=arguments.k,
         max_chunk_chars=arguments.max_chunk_chars,
         minimum_similarity=arguments.minimum_similarity,
+        split=arguments.split,
     )
     print(json.dumps(asdict(report), indent=2))
 

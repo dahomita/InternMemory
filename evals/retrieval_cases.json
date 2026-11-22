@@ -4,6 +4,7 @@
     {
       "id": "batch-tail-latency",
       "category": "exact_keyword",
+      "split": "calibration",
       "query": "batching tail latency",
       "relevant_source": "batching.md",
       "required_text": "Waiting for a batch to fill can increase tail latency."
@@ -11,6 +12,7 @@
     {
       "id": "batch-throughput-overhead",
       "category": "punctuation",
+      "split": "evaluation",
       "query": "throughput per-request overhead",
       "relevant_source": "batching.md",
       "required_text": "Larger batches can improve throughput by amortizing per-request overhead."
@@ -18,6 +20,7 @@
     {
       "id": "sqlite-wal-concurrency",
       "category": "exact_keyword",
+      "split": "evaluation",
       "query": "SQLite WAL readers writer",
       "relevant_source": "sqlite-reliability.md",
       "required_text": "SQLite WAL mode allows readers to continue while a writer commits changes."
@@ -25,6 +28,7 @@
     {
       "id": "sqlite-lock-contention",
       "category": "exact_keyword",
+      "split": "calibration",
       "query": "busy timeout lock contention",
       "relevant_source": "sqlite-reliability.md",
       "required_text": "A busy timeout can reduce immediate failures during temporary lock contention."
@@ -32,6 +36,7 @@
     {
       "id": "agent-bounded-loops",
       "category": "exact_keyword",
+      "split": "calibration",
       "query": "agent bounded tool calls",
       "relevant_source": "agent-harness.md",
       "required_text": "An agent harness should enforce bounded tool calls"
@@ -39,6 +44,7 @@
     {
       "id": "agent-tool-validation",
       "category": "exact_keyword",
+      "split": "evaluation",
       "query": "tool results schema validation",
       "relevant_source": "agent-harness.md",
       "required_text": "Tool results require schema validation before they enter model context."
@@ -46,6 +52,7 @@
     {
       "id": "batch-semantic-paraphrase",
       "category": "synonym",
+      "split": "calibration",
       "query": "bigger request groups slowest responses",
       "relevant_source": "batching.md",
       "required_text": "Waiting for a batch to fill can increase tail latency."
@@ -53,6 +60,7 @@
     {
       "id": "sqlite-expanded-abbreviation",
       "category": "abbreviation",
+      "split": "evaluation",
       "query": "write ahead log concurrent reads",
       "relevant_source": "sqlite-reliability.md",
       "required_text": "SQLite WAL mode allows readers to continue while a writer commits changes."
@@ -60,6 +68,7 @@
     {
       "id": "web-batching-network-overhead",
       "category": "distractor_corpus",
+      "split": "calibration",
       "query": "frontend analytics network overhead",
       "relevant_source": "web-request-batching.md",
       "required_text": "A frontend analytics client uses batching to reduce network overhead."
@@ -67,18 +76,21 @@
     {
       "id": "no-answer-encryption",
       "category": "no_answer",
+      "split": "calibration",
       "query": "AES encryption algorithm",
       "expected_no_answer": true
     },
     {
       "id": "no-answer-kubernetes",
       "category": "no_answer",
+      "split": "evaluation",
       "query": "Kubernetes autoscaling replicas",
       "expected_no_answer": true
     },
     {
       "id": "resilience-cross-chunk",
       "category": "chunk_boundary",
+      "split": "calibration",
       "query": "circuit breaker retry budget",
       "relevant_source": "resilience-boundary.md",
       "required_text": "A retry budget limits repeated attempts after transient failures."
@@ -86,6 +98,7 @@
     {
       "id": "resilience-distractor-control",
       "category": "distractor_corpus",
+      "split": "evaluation",
       "query": "synthetic overload drill alarm routing",
       "relevant_source": "resilience-distractor.md",
       "required_text": "This fictional synthetic overload drill validates alarm routing"
@@ -93,6 +106,7 @@
     {
       "id": "cache-stampede-control",
       "category": "exact_keyword",
+      "split": "calibration",
       "query": "cache stampede request coalescing",
       "relevant_source": "cache-reliability.md",
       "required_text": "A cache stampede occurs when many workers recompute the same expired value at once."
@@ -100,6 +114,7 @@
     {
       "id": "cache-stampede-paraphrase",
       "category": "semantic_paraphrase",
+      "split": "evaluation",
       "query": "many processes rebuild an old item simultaneously",
       "relevant_source": "cache-reliability.md",
       "required_text": "A cache stampede occurs when many workers recompute the same expired value at once."
@@ -107,6 +122,7 @@
     {
       "id": "queue-backpressure-control",
       "category": "exact_keyword",
+      "split": "evaluation",
       "query": "bounded queue backpressure producers consumers",
       "relevant_source": "queue-backpressure.md",
       "required_text": "A bounded queue applies backpressure when producers outpace consumers."
@@ -114,6 +130,7 @@
     {
       "id": "queue-backpressure-paraphrase",
       "category": "semantic_paraphrase",
+      "split": "calibration",
       "query": "incoming work arrives faster than processing capacity",
       "relevant_source": "queue-backpressure.md",
       "required_text": "A bounded queue applies backpressure when producers outpace consumers."
@@ -121,6 +138,7 @@
     {
       "id": "trace-context-control",
       "category": "exact_keyword",
+      "split": "calibration",
       "query": "distributed trace parent span identifier",
       "relevant_source": "trace-observability.md",
       "required_text": "Trace context carries a trace identifier and parent span identifier"
@@ -128,6 +146,7 @@
     {
       "id": "trace-context-paraphrase",
       "category": "semantic_paraphrase",
+      "split": "evaluation",
       "query": "connect request records between multiple services",
       "relevant_source": "trace-observability.md",
       "required_text": "A distributed trace follows one request across service boundaries."
@@ -135,7 +154,37 @@
     {
       "id": "no-answer-cache-encryption",
       "category": "partial_overlap_no_answer",
+      "split": "calibration",
       "query": "cache encryption key rotation",
+      "expected_no_answer": true
+    },
+    {
+      "id": "trace-percentile-control",
+      "category": "exact_keyword",
+      "split": "evaluation",
+      "query": "p95 percentile latency arithmetic mean",
+      "relevant_source": "trace-observability.md",
+      "required_text": "Percentile latency exposes slow requests that an arithmetic mean can hide."
+    },
+    {
+      "id": "no-answer-queue-durability",
+      "category": "partial_overlap_no_answer",
+      "split": "evaluation",
+      "query": "queue durable disk replication",
+      "expected_no_answer": true
+    },
+    {
+      "id": "no-answer-trace-redaction",
+      "category": "partial_overlap_no_answer",
+      "split": "calibration",
+      "query": "trace personal data redaction policy",
+      "expected_no_answer": true
+    },
+    {
+      "id": "no-answer-retry-transactions",
+      "category": "partial_overlap_no_answer",
+      "split": "evaluation",
+      "query": "retry transaction rollback isolation",
       "expected_no_answer": true
     }
   ]

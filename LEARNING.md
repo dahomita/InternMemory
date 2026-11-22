@@ -78,6 +78,9 @@
 - Vector search always has a nearest neighbor even when no answer exists.
   Semantic retrieval therefore needs separately calibrated abstention rather
   than treating the top result as automatically relevant.
+- Threshold selection is a form of fitting even when model weights remain
+  unchanged. Category-balanced calibration and held-out query splits reduce
+  evaluation leakage and ordering bias while sharing the same search corpus.
 
 ## Clarifications and Corrections
 
