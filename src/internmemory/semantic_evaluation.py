@@ -2,8 +2,9 @@
 
 import argparse
 import json
+import math
 import tempfile
-from dataclasses import asdict
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from time import perf_counter_ns
 
@@ -26,6 +27,15 @@ from internmemory.source_repository import SourceRepository
 
 DEFAULT_MODEL_NAME = "BAAI/bge-small-en-v1.5"
 DEFAULT_MODEL_DIMENSIONS = 384
+
+
+@dataclass(frozen=True, slots=True)
+class SemanticCalibration:
+    """A fitted abstention threshold and its calibration evidence."""
+
+    minimum_similarity: float
+    limiting_case_id: str
+    report: EvaluationReport
 
 
 def evaluate_semantic_cases(
@@ -93,6 +103,59 @@ def evaluate_semantic_cases(
     return summarize_case_results(case_results, k=k)
 
 
+def calibrate_semantic_threshold(
+    retriever: InMemorySemanticRetriever,
+    cases: list[RetrievalCase],
+    *,
+    k: int = 5,
+) -> SemanticCalibration:
+    """Choose the lowest threshold rejecting all no-answer cases."""
+
+    no_answer_cases = [
+        case
+        for case in cases
+        if case.expected_no_answer
+    ]
+    if not no_answer_cases:
+        raise ValueError(
+            "calibration requires at least one no-answer case"
+        )
+
+    top_scores: list[tuple[float, str]] = []
+    for case in no_answer_cases:
+        results = retriever.search(case.query, limit=1)
+        if not results:
+            raise RuntimeError(
+                "semantic corpus returned no calibration candidate"
+            )
+        top_scores.append((results[0].score, case.case_id))
+
+    highest_score, limiting_case_id = max(top_scores)
+    if highest_score >= 1.0:
+        raise ValueError(
+            "no threshold can reject an exact no-answer match"
+        )
+    minimum_similarity = math.nextafter(
+        highest_score,
+        math.inf,
+    )
+    report = evaluate_semantic_cases(
+        retriever,
+        cases,
+        k=k,
+        minimum_similarity=minimum_similarity,
+    )
+    if report.no_answer_accuracy != 1.0:
+        raise RuntimeError(
+            "calibrated threshold did not reject no-answer cases"
+        )
+    return SemanticCalibration(
+        minimum_similarity=minimum_similarity,
+        limiting_case_id=limiting_case_id,
+        report=report,
+    )
+
+
 def run_semantic_dataset(
     dataset_path: str | Path,
     fixtures_root: str | Path,
@@ -111,6 +174,58 @@ def run_semantic_dataset(
         for case in all_cases
         if split is None or case.split == split
     ]
+    retriever = _build_semantic_retriever(
+        all_cases,
+        fixtures_root,
+        provider,
+        max_chunk_chars=max_chunk_chars,
+    )
+    return evaluate_semantic_cases(
+        retriever,
+        cases,
+        k=k,
+        minimum_similarity=minimum_similarity,
+    )
+
+
+def run_semantic_calibration(
+    dataset_path: str | Path,
+    fixtures_root: str | Path,
+    provider: EmbeddingProvider,
+    *,
+    k: int = 5,
+    max_chunk_chars: int = 1_200,
+) -> SemanticCalibration:
+    """Fit an abstention threshold using calibration cases only."""
+
+    all_cases = load_cases(dataset_path)
+    calibration_cases = [
+        case
+        for case in all_cases
+        if case.split == "calibration"
+    ]
+    retriever = _build_semantic_retriever(
+        all_cases,
+        fixtures_root,
+        provider,
+        max_chunk_chars=max_chunk_chars,
+    )
+    return calibrate_semantic_threshold(
+        retriever,
+        calibration_cases,
+        k=k,
+    )
+
+
+def _build_semantic_retriever(
+    all_cases: list[RetrievalCase],
+    fixtures_root: str | Path,
+    provider: EmbeddingProvider,
+    *,
+    max_chunk_chars: int,
+) -> InMemorySemanticRetriever:
+    """Build one temporary cited corpus shared by selected query cases."""
+
     with tempfile.TemporaryDirectory() as temporary_directory:
         database_path = Path(temporary_directory) / "evaluation.db"
         initialize_database(database_path)
@@ -143,12 +258,7 @@ def run_semantic_dataset(
             )
 
         retriever = InMemorySemanticRetriever(provider, passages)
-        return evaluate_semantic_cases(
-            retriever,
-            cases,
-            k=k,
-            minimum_similarity=minimum_similarity,
-        )
+        return retriever
 
 
 def _normalize(value: str) -> str:
@@ -177,8 +287,13 @@ def main() -> None:
     parser.add_argument("--max-chunk-chars", type=int, default=1_200)
     parser.add_argument("--minimum-similarity", type=float)
     parser.add_argument(
+        "--calibrate",
+        action="store_true",
+        help="fit a threshold using calibration cases",
+    )
+    parser.add_argument(
         "--split",
-        choices=("calibration", "evaluation"),
+        choices=("calibration", "regression", "evaluation"),
     )
     arguments = parser.parse_args()
 
@@ -186,16 +301,26 @@ def main() -> None:
         model_name=DEFAULT_MODEL_NAME,
         dimensions=DEFAULT_MODEL_DIMENSIONS,
     )
-    report = run_semantic_dataset(
-        arguments.dataset,
-        arguments.fixtures,
-        provider,
-        k=arguments.k,
-        max_chunk_chars=arguments.max_chunk_chars,
-        minimum_similarity=arguments.minimum_similarity,
-        split=arguments.split,
-    )
-    print(json.dumps(asdict(report), indent=2))
+    if arguments.calibrate:
+        calibration = run_semantic_calibration(
+            arguments.dataset,
+            arguments.fixtures,
+            provider,
+            k=arguments.k,
+            max_chunk_chars=arguments.max_chunk_chars,
+        )
+        print(json.dumps(asdict(calibration), indent=2))
+    else:
+        report = run_semantic_dataset(
+            arguments.dataset,
+            arguments.fixtures,
+            provider,
+            k=arguments.k,
+            max_chunk_chars=arguments.max_chunk_chars,
+            minimum_similarity=arguments.minimum_similarity,
+            split=arguments.split,
+        )
+        print(json.dumps(asdict(report), indent=2))
 
 
 if __name__ == "__main__":

@@ -63,6 +63,21 @@ class SourceIngestRequest(BaseModel):
         return value
 
 
+class PublicSourceIngestRequest(BaseModel):
+    """Validated input for allowlisted public-document ingestion."""
+
+    url: str = Field(min_length=1, max_length=2_048)
+
+    @field_validator("url")
+    @classmethod
+    def url_must_not_be_blank(cls, value: str) -> str:
+        """Reject URLs containing only whitespace."""
+
+        if not value.strip():
+            raise ValueError("url must not be blank")
+        return value
+
+
 class SourceResponse(BaseModel):
     """Public representation of an ingested source snapshot."""
 

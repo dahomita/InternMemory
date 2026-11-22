@@ -106,4 +106,5 @@ def _cosine_similarity(
         left_value * right_value
         for left_value, right_value in zip(left, right)
     )
-    return dot_product / (left_norm * right_norm)
+    similarity = dot_product / (left_norm * right_norm)
+    return max(-1.0, min(1.0, similarity))

@@ -81,6 +81,21 @@
 - Threshold selection is a form of fitting even when model weights remain
   unchanged. Category-balanced calibration and held-out query splits reduce
   evaluation leakage and ordering bias while sharing the same search corpus.
+- A global semantic-similarity threshold may separate calibration examples yet
+  fail on unseen domains. Embedding similarity captures relatedness, not
+  whether retrieved text supports every requested detail.
+- Once held-out failures influence a new design, that split is no longer
+  untouched evidence for the revised system; refresh held-out cases before
+  claiming the next generalization result.
+- Reciprocal Rank Fusion combines result positions rather than incompatible
+  BM25 and cosine scores. Agreement across retrievers raises a candidate's
+  fused score, while optional weights express measured trust in each ranking.
+- Hybrid retrieval improved held-out ranking quality, but ranking and
+  abstention are separate problems: semantic and hybrid systems still returned
+  evidence for every unsupported query.
+- Safe public-document ingestion requires exact domain allowlists, HTTPS,
+  redirect revalidation, timeouts, byte bounds, content-type checks, visible
+  text extraction, and treating all downloaded content as untrusted data.
 
 ## Clarifications and Corrections
 
@@ -98,7 +113,6 @@
 
 - Larger, representative retrieval datasets and failure classification
 - Chunk overlap, neighbor expansion, and parent-child retrieval
-- Semantic embeddings and hybrid retrieval
 - Agent tool schemas, execution loops, and termination
 - Context budgets and evidence grounding
 - Tracing, model routing, token accounting, and cost evaluation

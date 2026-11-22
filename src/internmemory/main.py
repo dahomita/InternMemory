@@ -13,6 +13,9 @@ from internmemory.database import initialize_database
 from internmemory.ingestion_service import IngestionService
 from internmemory.note_repository import NoteRepository
 from internmemory.project_repository import ProjectRepository
+from internmemory.public_ingestion_service import (
+    PublicDocumentIngestionService,
+)
 from internmemory.recap_service import RecapService
 from internmemory.retrieval_service import RetrievalService
 from internmemory.source_repository import SourceRepository
@@ -22,6 +25,11 @@ from internmemory.task_repository import TaskRepository
 DEFAULT_DATABASE_PATH = Path("internmemory.db")
 DEFAULT_INGESTION_ROOT = Path("documents")
 DEFAULT_TIMEZONE = "America/New_York"
+DEFAULT_PUBLIC_DOCUMENT_DOMAINS = {
+    "docs.python.org",
+    "fastapi.tiangolo.com",
+    "www.sqlite.org",
+}
 
 
 def create_app(
@@ -32,6 +40,7 @@ def create_app(
     ingestion_root: str | Path = DEFAULT_INGESTION_ROOT,
     max_source_bytes: int = 1_000_000,
     max_chunk_chars: int = 1_200,
+    public_document_domains: set[str] | None = None,
 ) -> FastAPI:
     """Build an application configured for one database."""
 
@@ -54,6 +63,17 @@ def create_app(
         now_provider=now_provider,
     )
     retrieval_service = RetrievalService(chunk_repository)
+    public_ingestion_service = PublicDocumentIngestionService(
+        source_repository,
+        chunk_repository,
+        allowed_domains=(
+            public_document_domains
+            if public_document_domains is not None
+            else DEFAULT_PUBLIC_DOCUMENT_DOMAINS
+        ),
+        max_bytes=max_source_bytes,
+        max_chunk_chars=max_chunk_chars,
+    )
 
     @asynccontextmanager
     async def lifespan(_: FastAPI) -> AsyncIterator[None]:
@@ -73,6 +93,7 @@ def create_app(
     application.state.task_repository = task_repository
     application.state.recap_service = recap_service
     application.state.retrieval_service = retrieval_service
+    application.state.public_ingestion_service = public_ingestion_service
     application.include_router(router)
     return application
 

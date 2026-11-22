@@ -11,10 +11,13 @@ It must remain useful without an LLM.
 ```text
 FastAPI
 ├── Pydantic request/response validation
-├── Application services
+├── Local and allowlisted-public ingestion services
+├── Retrieval services
+│   ├── SQLite FTS5/BM25
+│   ├── Local BGE semantic baseline
+│   └── Reciprocal-rank-fusion hybrid baseline
 ├── Repository layer
-├── SQLite source-of-truth tables
-└── SQLite FTS5 index with BM25 ranking
+└── SQLite source-of-truth tables and FTS5 index
 ```
 
 The future agent harness will call these capabilities through explicit tools.
@@ -33,6 +36,8 @@ Storage and retrieval remain independent of model providers.
 - Strict-first retrieval with broad fallback and coverage-gated evidence groups
 - Optional model-independent embedding provider with local CPU inference
 - Exact in-memory semantic retrieval and comparable evaluation reporting
+- Reciprocal-rank-fusion hybrid retrieval evaluation
+- Allowlisted HTTPS documentation ingestion with bounded fetches
 - Versioned fictional retrieval corpus and labeled evaluation runner
 - Temporary-database integration tests
 
@@ -47,8 +52,8 @@ Storage and retrieval remain independent of model providers.
 
 ## Roadmap
 
-1. Personal memory foundation
-2. Document ingestion and retrieval evaluation
+1. Personal memory foundation — complete
+2. Document ingestion and retrieval evaluation — complete
 3. Model-independent agent harness and tools
 4. Controlled browser research and reliability work
 

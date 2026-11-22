@@ -19,6 +19,9 @@ from internmemory.chunk_repository import ChunkRepository
 from internmemory.ingestion_service import IngestionService
 from internmemory.note_repository import NoteRepository
 from internmemory.project_repository import ProjectRepository
+from internmemory.public_ingestion_service import (
+    PublicDocumentIngestionService,
+)
 from internmemory.recap_service import RecapService
 from internmemory.retrieval_service import RetrievalService
 from internmemory.task_repository import TaskRepository
@@ -33,6 +36,7 @@ from internmemory.schemas import (
     NoteUpdate,
     ProjectCreate,
     ProjectResponse,
+    PublicSourceIngestRequest,
     SourceIngestRequest,
     SourceResponse,
     TaskCreate,
@@ -109,6 +113,23 @@ IngestionServiceDependency = Annotated[
 ]
 
 
+def get_public_ingestion_service(
+    request: Request,
+) -> PublicDocumentIngestionService:
+    """Return the controlled public-document ingestion service."""
+
+    service: PublicDocumentIngestionService = (
+        request.app.state.public_ingestion_service
+    )
+    return service
+
+
+PublicIngestionServiceDependency = Annotated[
+    PublicDocumentIngestionService,
+    Depends(get_public_ingestion_service),
+]
+
+
 def get_chunk_repository(request: Request) -> ChunkRepository:
     """Return the chunk repository configured for this application."""
 
@@ -171,6 +192,29 @@ def ingest_source(
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=str(error),
+        ) from error
+
+    return SourceResponse.model_validate(source)
+
+
+@router.post("/sources/ingest-url", response_model=SourceResponse)
+def ingest_public_source(
+    request: PublicSourceIngestRequest,
+    service: PublicIngestionServiceDependency,
+) -> SourceResponse:
+    """Capture one allowlisted public documentation page."""
+
+    try:
+        source = service.ingest_url(request.url)
+    except ValueError as error:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail=str(error),
+        ) from error
+    except OSError as error:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Public document fetch failed",
         ) from error
 
     return SourceResponse.model_validate(source)

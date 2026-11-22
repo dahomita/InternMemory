@@ -12,7 +12,7 @@
     {
       "id": "batch-throughput-overhead",
       "category": "punctuation",
-      "split": "evaluation",
+      "split": "regression",
       "query": "throughput per-request overhead",
       "relevant_source": "batching.md",
       "required_text": "Larger batches can improve throughput by amortizing per-request overhead."
@@ -20,7 +20,7 @@
     {
       "id": "sqlite-wal-concurrency",
       "category": "exact_keyword",
-      "split": "evaluation",
+      "split": "regression",
       "query": "SQLite WAL readers writer",
       "relevant_source": "sqlite-reliability.md",
       "required_text": "SQLite WAL mode allows readers to continue while a writer commits changes."
@@ -44,7 +44,7 @@
     {
       "id": "agent-tool-validation",
       "category": "exact_keyword",
-      "split": "evaluation",
+      "split": "regression",
       "query": "tool results schema validation",
       "relevant_source": "agent-harness.md",
       "required_text": "Tool results require schema validation before they enter model context."
@@ -60,7 +60,7 @@
     {
       "id": "sqlite-expanded-abbreviation",
       "category": "abbreviation",
-      "split": "evaluation",
+      "split": "regression",
       "query": "write ahead log concurrent reads",
       "relevant_source": "sqlite-reliability.md",
       "required_text": "SQLite WAL mode allows readers to continue while a writer commits changes."
@@ -83,7 +83,7 @@
     {
       "id": "no-answer-kubernetes",
       "category": "no_answer",
-      "split": "evaluation",
+      "split": "regression",
       "query": "Kubernetes autoscaling replicas",
       "expected_no_answer": true
     },
@@ -98,7 +98,7 @@
     {
       "id": "resilience-distractor-control",
       "category": "distractor_corpus",
-      "split": "evaluation",
+      "split": "regression",
       "query": "synthetic overload drill alarm routing",
       "relevant_source": "resilience-distractor.md",
       "required_text": "This fictional synthetic overload drill validates alarm routing"
@@ -114,7 +114,7 @@
     {
       "id": "cache-stampede-paraphrase",
       "category": "semantic_paraphrase",
-      "split": "evaluation",
+      "split": "regression",
       "query": "many processes rebuild an old item simultaneously",
       "relevant_source": "cache-reliability.md",
       "required_text": "A cache stampede occurs when many workers recompute the same expired value at once."
@@ -122,7 +122,7 @@
     {
       "id": "queue-backpressure-control",
       "category": "exact_keyword",
-      "split": "evaluation",
+      "split": "regression",
       "query": "bounded queue backpressure producers consumers",
       "relevant_source": "queue-backpressure.md",
       "required_text": "A bounded queue applies backpressure when producers outpace consumers."
@@ -146,7 +146,7 @@
     {
       "id": "trace-context-paraphrase",
       "category": "semantic_paraphrase",
-      "split": "evaluation",
+      "split": "regression",
       "query": "connect request records between multiple services",
       "relevant_source": "trace-observability.md",
       "required_text": "A distributed trace follows one request across service boundaries."
@@ -161,7 +161,7 @@
     {
       "id": "trace-percentile-control",
       "category": "exact_keyword",
-      "split": "evaluation",
+      "split": "regression",
       "query": "p95 percentile latency arithmetic mean",
       "relevant_source": "trace-observability.md",
       "required_text": "Percentile latency exposes slow requests that an arithmetic mean can hide."
@@ -169,7 +169,7 @@
     {
       "id": "no-answer-queue-durability",
       "category": "partial_overlap_no_answer",
-      "split": "evaluation",
+      "split": "regression",
       "query": "queue durable disk replication",
       "expected_no_answer": true
     },
@@ -183,8 +183,101 @@
     {
       "id": "no-answer-retry-transactions",
       "category": "partial_overlap_no_answer",
-      "split": "evaluation",
+      "split": "regression",
       "query": "retry transaction rollback isolation",
+      "expected_no_answer": true
+    },
+    {
+      "id": "rate-token-bucket-control",
+      "category": "exact_keyword",
+      "split": "evaluation",
+      "query": "token bucket sustained request rate",
+      "relevant_source": "rate-limiting.md",
+      "required_text": "A token bucket allows short traffic bursts while enforcing a sustained request rate."
+    },
+    {
+      "id": "rate-token-bucket-paraphrase",
+      "category": "semantic_paraphrase",
+      "split": "evaluation",
+      "query": "permit brief spikes but cap long term traffic",
+      "relevant_source": "rate-limiting.md",
+      "required_text": "A token bucket allows short traffic bursts while enforcing a sustained request rate."
+    },
+    {
+      "id": "index-covering-control",
+      "category": "exact_keyword",
+      "split": "evaluation",
+      "query": "covering index base table random I/O",
+      "relevant_source": "database-indexes.md",
+      "required_text": "A covering index contains every column needed by a query"
+    },
+    {
+      "id": "index-covering-paraphrase",
+      "category": "semantic_paraphrase",
+      "split": "evaluation",
+      "query": "answer reads entirely from secondary lookup structure",
+      "relevant_source": "database-indexes.md",
+      "required_text": "A covering index contains every column needed by a query"
+    },
+    {
+      "id": "canary-rollout-control",
+      "category": "exact_keyword",
+      "split": "evaluation",
+      "query": "canary rollout production traffic guardrails",
+      "relevant_source": "deployment-rollout.md",
+      "required_text": "A canary rollout sends a small fraction of production traffic to a new version"
+    },
+    {
+      "id": "canary-rollout-paraphrase",
+      "category": "semantic_paraphrase",
+      "split": "evaluation",
+      "query": "test a release on a limited audience before expanding",
+      "relevant_source": "deployment-rollout.md",
+      "required_text": "A canary rollout sends a small fraction of production traffic to a new version"
+    },
+    {
+      "id": "cache-stale-refresh-control",
+      "category": "exact_keyword",
+      "split": "evaluation",
+      "query": "stale while revalidate refresh",
+      "relevant_source": "cache-reliability.md",
+      "required_text": "Stale-while-revalidate can serve a bounded stale value during refresh"
+    },
+    {
+      "id": "queue-load-shedding-control",
+      "category": "morphology",
+      "split": "evaluation",
+      "query": "load shedding lower priority saturated workers",
+      "relevant_source": "queue-backpressure.md",
+      "required_text": "Load shedding protects completed work by rejecting lower-priority requests"
+    },
+    {
+      "id": "trace-percentile-paraphrase",
+      "category": "semantic_paraphrase",
+      "split": "evaluation",
+      "query": "average hides the slowest five percent of requests",
+      "relevant_source": "trace-observability.md",
+      "required_text": "Percentile latency exposes slow requests that an arithmetic mean can hide."
+    },
+    {
+      "id": "no-answer-rate-signing",
+      "category": "partial_overlap_no_answer",
+      "split": "evaluation",
+      "query": "rate limit cryptographic signing keys",
+      "expected_no_answer": true
+    },
+    {
+      "id": "no-answer-index-replication",
+      "category": "partial_overlap_no_answer",
+      "split": "evaluation",
+      "query": "database index network replication quorum",
+      "expected_no_answer": true
+    },
+    {
+      "id": "no-answer-canary-permissions",
+      "category": "partial_overlap_no_answer",
+      "split": "evaluation",
+      "query": "canary employee access permissions",
       "expected_no_answer": true
     }
   ]

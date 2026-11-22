@@ -7,7 +7,10 @@ from pathlib import Path
 import pytest
 
 from internmemory.embedding import EmbeddingVector
-from internmemory.semantic_evaluation import run_semantic_dataset
+from internmemory.semantic_evaluation import (
+    run_semantic_calibration,
+    run_semantic_dataset,
+)
 
 
 class KeywordVectorProvider:
@@ -51,6 +54,7 @@ def test_semantic_dataset_uses_same_retrieval_metrics(
                     {
                         "id": "latency",
                         "category": "exact_keyword",
+                        "split": "calibration",
                         "query": "latency",
                         "relevant_source": "latency.md",
                         "required_text": "Tail latency",
@@ -58,6 +62,7 @@ def test_semantic_dataset_uses_same_retrieval_metrics(
                     {
                         "id": "unsupported",
                         "category": "no_answer",
+                        "split": "calibration",
                         "query": "encryption",
                         "expected_no_answer": True,
                     },
@@ -77,3 +82,14 @@ def test_semantic_dataset_uses_same_retrieval_metrics(
     assert report.recall_at_k == pytest.approx(1.0)
     assert report.mrr == pytest.approx(1.0)
     assert report.no_answer_accuracy == pytest.approx(0.0)
+
+    calibration = run_semantic_calibration(
+        dataset_path,
+        fixtures_root,
+        KeywordVectorProvider(),
+    )
+
+    assert calibration.minimum_similarity > 0.0
+    assert calibration.limiting_case_id == "unsupported"
+    assert calibration.report.recall_at_k == pytest.approx(1.0)
+    assert calibration.report.no_answer_accuracy == pytest.approx(1.0)

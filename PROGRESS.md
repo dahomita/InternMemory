@@ -2,8 +2,7 @@
 
 ## Current Status
 
-Phase 1 has a working local functional baseline. Phase 2 retrieval work now
-includes:
+Phases 1 and 2 are complete. InternMemory now includes:
 
 - FastAPI application factory and health endpoint
 - SQLite projects, notes, and tasks
@@ -16,51 +15,32 @@ includes:
 - Deterministic no-overlap document chunks
 - FTS5/BM25 chunk search with citation metadata
 - Versioned retrieval cases and repeatable quality/latency reporting
+- Local BGE semantic retrieval and weighted-RRF hybrid baselines
+- Allowlisted public documentation ingestion
 
 ## Verification
 
-- Last full test run: `59 passed in 1.33s`
+- Final Phase 2 test run: `69 passed in 1.64s`
 - IDE diagnostics: no lint errors
 - Local SQLite version tested: `3.40.1` with FTS5 support
-- Expanded 24-case strict baseline: Recall@5 `0.667`, MRR `0.639`,
-  measured mean precision@5 `0.639`
-- Strict no-answer accuracy: `1.0` on 6 cases
-- Exact/punctuation cases: all retrieved; one distractor moved relevant evidence
-  from rank 1 to rank 2
-- Synonym/abbreviation cases: 0 of 2 retrieved
-- Semantic-paraphrase cases: 0 of 3 retrieved by strict AND
-- Cross-chunk case: 0 of 1 retrieved because strict AND found no candidate
-- Any-term candidate experiment: Recall@5 `0.944`, MRR `0.807`; measured mean
-  precision@5 fell to `0.381`, no-answer accuracy to `0.333`
-- Prioritized fallback preserved the same measured quality as OR on this
-  corpus while executing two FTS queries
-- Coverage-gated neighbor grouping combines cross-boundary evidence while
-  preserving each chunk's citation offsets
-- Grouped evaluation: Recall@5 `0.944`, MRR `0.810`, measured mean precision@5
-  `0.391`
-- Coverage-reranked grouping: Recall@5 `0.944`, MRR `0.838`, measured mean
-  precision@5 `0.391`, no-answer accuracy `0.333`
-- The partial-overlap no-answer case exposes false evidence from broad OR
-  fallback
-- A 50% coverage acceptance threshold raises measured precision to `0.611`
-  and no-answer accuracy to `1.0`, while recall falls to `0.722`;
-  `/search/evidence` uses this threshold after coverage reranking
-- Batched source-chunk loading removes per-candidate reads; one sample reduced
-  grouped median latency from `1.37 ms` to `0.99 ms`
-- `/search/evidence` exposes grouped chunks without changing the existing
-  `/search/documents` response contract
-- Optional FastEmbed adapter verified with local
-  `BAAI/bge-small-en-v1.5` query and passage embeddings (384 dimensions)
-- Calibration and held-out evaluation splits each contain 9 answerable and 3
-  no-answer cases while sharing the complete corpus
-- Untuned BGE Recall@5 is `1.0` on both splits; calibration MRR is `0.870` and
-  held-out MRR is `0.828`; no-answer accuracy is `0.0` on both
-- Prior raw-syntax baseline: Recall@5 `0.8333`, MRR `0.8333`
-- Sample expanded-run latency: median `0.290 ms`, p95 `0.346 ms`
+- Retrieval corpus: 36 queries in balanced calibration, regression, and fresh
+  evaluation splits; each split has 9 answerable and 3 no-answer cases
+- Fresh held-out grounded keyword: Recall@5 `0.667`, MRR `0.667`, measured
+  precision@5 `0.611`, no-answer accuracy `1.0`
+- Fresh held-out semantic: Recall@5 `1.0`, MRR `0.870`, measured precision@5
+  `0.200`, no-answer accuracy `0.0`
+- Fresh held-out weighted hybrid: Recall@5 `1.0`, MRR `0.944`, measured
+  precision@5 `0.200`, no-answer accuracy `0.0`
+- Sample median/p95 query latency: keyword `1.16/3.18 ms`, semantic
+  `4.17/4.94 ms`, hybrid `5.26/6.41 ms`
+- Similarity-only threshold calibration was rejected after held-out no-answer
+  accuracy fell to `0.333`
+- Live public-ingestion verification captured Python's asyncio documentation
+  into 4 chunks and returned 3 relevant keyword results
 
 ## Current Task
 
-Calibrate semantic abstention using only the calibration split.
+Phase 2 complete. Phase 3 agent-harness work has not started.
 
 ## Known Limitations
 
@@ -72,12 +52,17 @@ Calibrate semantic abstention using only the calibration split.
 - Production search still defaults to AND semantics, which can over-constrain
   prose; the evaluation runner can compare any-term OR candidates
 - Retrieval corpus is too small for production-quality conclusions
+- Semantic vectors are rebuilt in memory and brute-force scanned
+- Hybrid retrieval has no reliable answerability/abstention policy and is not
+  exposed as grounded API evidence
+- Public HTML extraction is intentionally simple and limited to configured
+  exact domains
 - No custom frontend
 - No LLM provider or agent harness
 
 ## Next Steps
 
-1. Separate calibration and final-evaluation cases.
-2. Calibrate semantic abstention on the calibration split.
-3. Add representative public-document cases.
-4. Compare keyword, semantic, and hybrid retrieval on held-out cases.
+1. Review and commit the completed Phase 2 milestone.
+2. Define Phase 3 model and tool interfaces.
+3. Build a bounded model-independent agent loop.
+4. Expose grounded retrieval as a validated read-only agent tool.

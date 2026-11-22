@@ -50,7 +50,20 @@ Select one deterministic query split while retaining the complete corpus:
 
 ```bash
 python -m internmemory.semantic_evaluation --split calibration
+python -m internmemory.semantic_evaluation --split regression
 python -m internmemory.semantic_evaluation --split evaluation
+```
+
+Fit a semantic threshold using calibration cases only:
+
+```bash
+python -m internmemory.semantic_evaluation --calibrate
+```
+
+Run reciprocal-rank-fusion hybrid retrieval:
+
+```bash
+python -m internmemory.hybrid_evaluation --split evaluation
 ```
 
 Each case identifies a failure category, query, relevant source, and required

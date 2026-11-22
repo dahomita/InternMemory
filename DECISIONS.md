@@ -169,8 +169,59 @@
 
 - **Problem:** Selecting a similarity threshold on the same cases used for the
   final report would leak answers into the design and overstate quality.
-- **Decision:** Version deterministic `calibration` and `evaluation` labels.
-  Each split contains 9 answerable and 3 no-answer queries, and both search the
-  same complete fixture corpus.
+- **Decision:** Version deterministic `calibration`, `regression`, and fresh
+  `evaluation` labels. Each split contains 9 answerable and 3 no-answer
+  queries, and all search the same complete fixture corpus.
 - **Tradeoff:** The split is transparent and reproducible, but 12 queries per
   side remain too few for production conclusions and should grow by category.
+
+## ADR-019: Reject a global semantic-only abstention threshold
+
+- **Problem:** Vector search always returns related passages, including for
+  unsupported questions, so semantic retrieval needs an abstention policy.
+- **Experiment:** Choose the lowest BGE similarity threshold that gives `1.0`
+  no-answer accuracy on calibration. The selected threshold was `0.5934`.
+- **Evidence:** Calibration Recall@5 and no-answer accuracy were both `1.0`.
+  Held-out Recall@5 was `0.889`, but no-answer accuracy fell to `0.333`.
+- **Decision:** Do not expose or persist this threshold. Investigate hybrid
+  evidence policies and expand domain-balanced calibration data.
+- **Tradeoff:** Rejecting the threshold delays semantic API integration, but
+  avoids presenting topical relatedness as grounded support.
+
+## ADR-020: Use weighted RRF as the hybrid ranking baseline
+
+- **Problem:** BM25 scores and cosine similarities have different scales and
+  directions, so adding their raw values is not meaningful.
+- **Decision:** Fuse keyword and semantic rank positions with Reciprocal Rank
+  Fusion. Use semantic weight `2.0` after calibration/regression comparison;
+  do not expose hybrid results as grounded API evidence yet.
+- **Evidence:** On the fresh 12-case held-out split, hybrid Recall@5 was `1.0`
+  and MRR `0.944`, versus semantic MRR `0.870` and grounded-keyword Recall@5
+  and MRR `0.667`.
+- **Tradeoff:** Hybrid ranking was strongest, but no-answer accuracy remained
+  `0.0`; rank fusion does not prove evidential support.
+
+## ADR-021: Ingest public documentation through a bounded allowlist
+
+- **Problem:** Public technical documentation is useful retrieval evidence,
+  but arbitrary URL fetching introduces SSRF, resource, and untrusted-content
+  risks.
+- **Decision:** Permit exact allowlisted HTTPS hosts, revalidate redirects,
+  enforce timeout/byte/content-type limits, extract visible text without
+  executing HTML, and store a hashed local snapshot with URL provenance.
+- **Evidence:** A live temporary-database test ingested Python's asyncio page
+  into 4 chunks and retrieved relevant terms; network-free tests cover active
+  content removal and request/redirect rejection.
+- **Tradeoff:** The standard-library HTML extractor is intentionally simple
+  and may include navigation text or omit complex rendered documentation.
+
+## ADR-022: Keep grounded keyword retrieval as the Phase 2 product path
+
+- **Problem:** Semantic and hybrid retrieval improve recall and ranking but
+  returned nearest neighbors for all held-out no-answer queries.
+- **Decision:** Keep `/search/evidence` on coverage-thresholded keyword
+  retrieval. Retain semantic and hybrid implementations as evaluated
+  baselines for future agent candidate generation, not final grounded context.
+- **Tradeoff:** Product recall remains lower, but unsupported evidence is less
+  likely to be presented as authoritative. A later reranker or answerability
+  check can revisit the decision with fresh held-out cases.

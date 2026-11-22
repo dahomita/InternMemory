@@ -26,7 +26,7 @@ RetrievalStrategy = Literal[
     "grouped_reranked",
     "grouped_reranked_thresholded",
 ]
-CaseSplit = Literal["calibration", "evaluation"]
+CaseSplit = Literal["calibration", "regression", "evaluation"]
 
 
 @dataclass(frozen=True, slots=True)
@@ -113,7 +113,11 @@ def load_cases(dataset_path: str | Path) -> list[RetrievalCase]:
             )
         ):
             raise ValueError("evaluation case values must not be blank")
-        if case.split not in ("calibration", "evaluation"):
+        if case.split not in (
+            "calibration",
+            "regression",
+            "evaluation",
+        ):
             raise ValueError("unsupported evaluation case split")
         if case.expected_no_answer:
             if (
@@ -398,7 +402,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--split",
-        choices=("calibration", "evaluation"),
+        choices=("calibration", "regression", "evaluation"),
     )
     arguments = parser.parse_args()
 
