@@ -225,3 +225,69 @@
 - **Tradeoff:** Product recall remains lower, but unsupported evidence is less
   likely to be presented as authoritative. A later reranker or answerability
   check can revisit the decision with fresh held-out cases.
+
+## ADR-023: Build and verify the harness without a real model first
+
+- **Problem:** Model variability, API cost, and tool-selection errors can hide
+  defects in the execution loop itself.
+- **Decision:** Define a provider protocol, test the bounded loop with scripted
+  responses, validate tool inputs through a typed registry, and expose only
+  the existing read-only grounded retrieval service initially.
+- **Evidence:** Deterministic tests cover final answers, tool round trips, step
+  limits, token accounting, invalid arguments, unknown tools, citations, and
+  retrieval abstention without any model API calls.
+- **Tradeoff:** This isolates harness correctness and avoids cost, but cannot
+  measure whether a real model chooses tools or uses evidence reliably. Those
+  behaviors require a separate agent evaluation before model selection.
+
+## ADR-024: Require component checks for overall agent success
+
+- **Problem:** One aggregate result can hide cases where retrieval succeeds
+  but the final answer ignores evidence or invents a citation.
+- **Decision:** Score completion, tool selection, evidence retrieval, answer
+  grounding, citation correctness, and abstention separately. Overall success
+  requires every case-specific dimension to pass.
+- **Evidence:** A deterministic test retrieves the labeled source but produces
+  an unsupported answer; evidence passes while grounding and overall success
+  fail. Citations are checked against retrieved locator, snapshot hash, and
+  chunk IDs.
+- **Tradeoff:** Required-answer-term checks are transparent and repeatable but
+  cannot detect every unsupported generated claim. Human review or a validated
+  model judge will be needed for richer semantic grading.
+
+## ADR-025: Keep final synthesis text-only and attach citations locally
+
+- **Problem:** Groq JSON mode, strict JSON Schema mode, and a forced synthetic
+  final-answer tool each failed intermittently when generating nested citation
+  payloads, even after retrieval and evidence selection succeeded.
+- **Options:** Retry structured generation, accept prompt-produced JSON, use a
+  simpler plain-text synthesis boundary, or generate the entire answer
+  deterministically.
+- **Decision:** After one successful retrieval, give the model a clean context
+  and request only concise answer text. Construct citation metadata from the
+  validated retrieval observation. If retrieval returns no evidence, return a
+  deterministic local abstention without a second model call.
+- **Evidence:** The resulting GPT-OSS candidate passed all four development
+  cases in one aggregate run with every component rate at `1.0`, using `3,503`
+  input and `881` output tokens. The previous approaches produced intermittent
+  HTTP 400 formatting failures.
+- **Tradeoff:** The model no longer controls citation identifiers, eliminating
+  malformed or invented citation metadata. However, citations currently cover
+  retrieved evidence groups rather than associating each generated claim with
+  a specific passage.
+
+## ADR-026: Treat the first frozen agent split as consumed
+
+- **Problem:** The frozen run exposed both a real paraphrase-retrieval failure
+  and an exact-term grader false negative. Changing the system in response and
+  repeatedly reporting against the same cases would overstate generalization.
+- **Decision:** Preserve the `0.5` frozen result as the first unbiased
+  measurement. Use its failures for diagnosis, but require new development
+  coverage and a fresh held-out split before evaluating a revised design.
+- **Evidence:** All four cases completed with correct tool selection and
+  one-call efficiency. SQLite WAL and unsupported cache encryption passed; the
+  p95 case failed grounding despite correct evidence and equivalent wording;
+  the queue paraphrase failed evidence retrieval.
+- **Tradeoff:** Refreshing evaluation data adds labeling work and makes the
+  headline score less convenient, but prevents test-set tuning from being
+  mistaken for a broadly better agent.

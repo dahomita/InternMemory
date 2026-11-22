@@ -96,6 +96,144 @@
 - Safe public-document ingestion requires exact domain allowlists, HTTPS,
   redirect revalidation, timeouts, byte bounds, content-type checks, visible
   text extraction, and treating all downloaded content as untrusted data.
+- An agent harness owns execution policy around a model: state, tools, limits,
+  validation, termination, and observability. The model proposes actions; it
+  does not learn permanently from one harness run.
+- A provider protocol separates agent behavior from a specific model vendor.
+  A deterministic scripted provider makes harness failures reproducible and
+  testable without API cost or model variability.
+- Immutable model requests preserve exact context snapshots for debugging and
+  prevent later message mutations from rewriting execution history.
+- Tool schemas constrain structure, types, and bounds before dispatch, while a
+  registry restricts calls to explicitly available tools. Schema validation
+  does not sanitize valid strings; parameterized SQL and safe query handling
+  remain necessary downstream defenses.
+- Read-only tools reduce blast radius while validating model behavior. Reusing
+  the application retrieval service keeps API and agent grounding consistent;
+  explicit abstention prevents an empty result from being mistaken for proof.
+- A useful agent trace separates model input/action, tool arguments/output,
+  timing, token usage, and errors. Good retrieved evidence followed by an
+  unsupported answer indicates a model-grounding failure; missing evidence can
+  instead indicate retrieval or tool-query failure.
+- Traces can contain sensitive retrieved content. Keeping initial traces in
+  memory avoids accidental external logging; durable traces later require
+  explicit retention, access, and redaction policies.
+- Scripted-model scenarios prove deterministic harness behavior such as
+  bounded correction and abstention propagation. They do not measure whether
+  a real model will select the right tool, form a useful query, follow
+  evidence, or behave consistently across repeated runs.
+- A step limit bounds model decisions, not context or token cost. Context grows
+  across steps, and one call or tool result can still be very large, so useful
+  harnesses need independent step, context, token, and tool-output budgets.
+- Character counts provide a model-independent context estimate but do not
+  equal tokens. Provider-reported token limits are also reactive; real model
+  adapters should enforce maximum output tokens before generation.
+- End-to-end task success should require correct tool use, evidence, grounding,
+  citations, and abstention behavior. Reporting component metrics separately
+  reveals whether retrieval or answer generation caused the failure.
+- A citation is verifiable when it matches the locator, source snapshot hash,
+  and retrieved chunk IDs. Required-answer-term checks are a reproducible
+  baseline, not proof that every generated claim is supported.
+- A no-evidence prompt and an answer-without-evidence failure are different:
+  the first describes missing knowledge, while the second describes an agent
+  that answered without grounding. Agent datasets should label expected
+  behavior and classify the observed failure separately.
+- Development cases can guide iteration, while a frozen evaluation split gives
+  less-biased evidence for the final prompt/model configuration.
+- Component rates identify which subsystem needs improvement. A causal primary
+  failure order prevents one upstream miss from being counted again as several
+  downstream root causes; for example, missing evidence precedes grounding and
+  citation failures.
+- A hosted provider adapter translates internal messages and tool schemas into
+  an external API contract, then validates every returned action before the
+  harness executes it. Timeouts, response-size limits, output-token caps, and
+  environment-only credentials bound cost and failure impact.
+- Free hosted inference still transmits selected evidence off-device. Zero
+  Data Retention and no-training terms reduce provider retention risk but do
+  not authorize sending confidential employer data.
+- Live evaluations should be explicit commands, use fictional fixtures, and
+  exclude frozen cases during iteration. Keeping network calls out of unit
+  tests preserves deterministic, free local verification.
+- A sub-second "request failed or timed out" result with zero provider tokens
+  is not a model-quality failure. Distinguishing TLS, DNS, network, timeout,
+  and HTTP errors prevents infrastructure defects from contaminating agent
+  evaluation conclusions.
+- Correct tool choice and efficient tool use are separate metrics. Repeating
+  the right search can still produce a grounded answer while wasting model
+  steps, context tokens, latency, and free-tier capacity.
+- End-to-end correctness should not fail solely because a bounded corrective
+  search was needed. Report efficiency separately so optimization pressure
+  does not encourage the agent to answer from weak first-pass evidence.
+- Provider capabilities can conflict: Groq JSON mode cannot be combined with
+  tool calling for this model. Harness instructions plus strict local parsing
+  preserve safety, but schema adherence becomes an evaluated model behavior.
+- Repeated identical successful calls are a harness-policy problem when the
+  model remains free to choose tools forever. Removing tool availability after
+  a successful bounded result forces synthesis, while retaining tools after a
+  validation error still permits correction.
+- Rate-limit retries require backoff and a retry budget. Re-running an entire
+  agent task immediately repeats earlier calls and can worsen token pressure;
+  no automatic retry is safer during initial evaluation.
+- Provider feature constraints can depend on conversation history, not only
+  the current request's tool list. Groq JSON generation failed after prior tool
+  messages even when tools were hidden on the final turn, so the adapter must
+  validate instruction-produced JSON locally for tool-using conversations.
+- Separating tool selection from final synthesis can simplify provider
+  constraints. A clean synthesis context includes the original question and
+  retrieved evidence as untrusted data, enabling JSON syntax enforcement
+  without carrying incompatible tool-protocol history. The harness still
+  validates answer fields and citations locally.
+- Stronger constrained decoding is not automatically more reliable. GPT-OSS
+  formed the complete search query but Groq strict-schema generation failed;
+  JSON Object mode plus local validation is the more portable boundary.
+- Retrieving the expected source does not prove that the necessary passage was
+  retrieved. Evidence evaluation must verify required labeled content across
+  returned chunks; otherwise a narrow query can receive false credit.
+- Query formulation is part of agent quality. A lexical search query must
+  preserve all essential concepts from the user question while removing
+  conversational filler.
+- Model selection should use component evidence, not general reputation.
+  GPT-OSS preserved both cross-chunk concepts where Qwen omitted one, producing
+  complete retrieval and a grounded answer under the same harness and dataset.
+- Correctness, latency, tokens, and presentation quality are distinct. A
+  grounded answer can pass task metrics while still being too verbose or
+  containing formatting defects worth optimizing later.
+- Structured syntax does not guarantee valid product semantics. JSON mode can
+  produce a schema-shaped abstention with a blank answer, so local domain
+  validation and explicit user-facing requirements remain necessary.
+- Provider-enforced structure is not always the most reliable boundary. After
+  JSON mode, strict schema mode, and a synthetic final-answer tool all failed
+  intermittently, reducing the model's final responsibility to plain answer
+  text removed fragile nested citation generation.
+- Citation metadata can be constructed from the exact validated retrieval
+  result rather than recopied by the model. This improves format reliability
+  and provenance integrity, but broad evidence-group citations do not yet
+  prove that every individual generated claim is supported.
+- Empty retrieval is a deterministic state, so the harness can return a safe
+  local abstention without paying for another model call or allowing the model
+  to invent an unsupported answer.
+- A transient remote disconnect is an infrastructure failure, not evidence of
+  poor reasoning. Retries should be bounded and added only with explicit
+  consideration of duplicate requests, token cost, and rate limits.
+- Held-out component metrics distinguish architecture failures from grader
+  failures. The p95 answer retrieved and cited the right evidence but failed an
+  exact phrase check despite equivalent meaning; the backpressure case failed
+  earlier because lexical retrieval received none of the source terminology.
+- Exact required-term grading is reproducible but can produce false negatives
+  on valid paraphrases. A stronger semantic or human-reviewed grader must still
+  remain evidence-aware so fluent unsupported answers do not receive credit.
+- A model cannot reliably translate every paraphrase into unknown document
+  vocabulary. Semantic candidate generation can address this recall gap, but
+  earlier no-answer experiments show that semantic similarity alone is not
+  sufficient evidence for answering.
+- After examining frozen failures, that split is consumed for the current
+  design. It can support diagnosis, but measuring the next design fairly
+  requires new held-out cases that did not influence the change.
+- Deterministic concept groups are a middle ground between brittle exact
+  phrases and an expensive model judge. Every labeled concept is still
+  required, while human-approved alternatives and punctuation normalization
+  allow equivalent expressions. Their quality still depends on complete,
+  carefully reviewed labels.
 
 ## Clarifications and Corrections
 
@@ -113,7 +251,7 @@
 
 - Larger, representative retrieval datasets and failure classification
 - Chunk overlap, neighbor expansion, and parent-child retrieval
-- Agent tool schemas, execution loops, and termination
+- Frozen agent evaluation and broader model reliability measurement
 - Context budgets and evidence grounding
 - Tracing, model routing, token accounting, and cost evaluation
 - Browser automation and MCP

@@ -83,3 +83,18 @@ queries; they are excluded from Recall@k and MRR.
 The current corpus is intentionally small. Its purpose is to establish a
 reproducible evaluation pipeline before expanding coverage. Do not tune search
 only to these examples; add representative failures as new labeled cases.
+
+## Agent evaluations
+
+`agent_cases.json` contains fictional prompts and human-labeled expectations
+for future real-model evaluation. Development cases may guide implementation;
+the evaluation split should remain frozen until a model or prompt comparison
+is complete.
+
+Each case labels the expected tool sequence, evidence source and required
+answer terms, or explicit abstention. Agent scoring reports completion, tool
+selection, evidence retrieval, grounding, citation, and abstention separately.
+Overall success requires every relevant dimension to pass.
+
+The deterministic term checks are a transparent baseline, not a semantic
+judge. They cannot prove that every generated statement is supported.

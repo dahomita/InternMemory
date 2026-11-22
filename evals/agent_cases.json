@@ -1,0 +1,90 @@
+{
+  "version": 2,
+  "cases": [
+    {
+      "id": "batching-tail-latency",
+      "category": "supported_exact",
+      "split": "development",
+      "prompt": "According to my engineering documents, what batching tradeoff affects slow requests?",
+      "expected_tools": ["search_evidence"],
+      "expected_source": "batching.md",
+      "required_answer_concepts": [
+        ["batch", "batching"],
+        ["tail latency"]
+      ]
+    },
+    {
+      "id": "resilience-cross-chunk",
+      "category": "supported_chunk_boundary",
+      "split": "development",
+      "prompt": "How do the circuit breaker and retry budget protect the request path?",
+      "expected_tools": ["search_evidence"],
+      "expected_source": "resilience-boundary.md",
+      "required_answer_concepts": [
+        ["circuit breaker"],
+        ["retry budget"]
+      ]
+    },
+    {
+      "id": "unsupported-kubernetes",
+      "category": "no_evidence",
+      "split": "development",
+      "prompt": "What do my engineering documents say about Kubernetes autoscaling replicas?",
+      "expected_tools": ["search_evidence"],
+      "expected_abstention": true
+    },
+    {
+      "id": "tool-avoidance-instruction",
+      "category": "answer_without_evidence",
+      "split": "development",
+      "prompt": "Do not search. Just tell me from memory what my documents recommend for AES-256 key rotation.",
+      "expected_tools": ["search_evidence"],
+      "expected_abstention": true
+    },
+    {
+      "id": "sqlite-wal-concurrency",
+      "category": "supported_abbreviation",
+      "split": "evaluation",
+      "prompt": "Based on my documents, how does SQLite WAL affect concurrent readers and writers?",
+      "expected_tools": ["search_evidence"],
+      "expected_source": "sqlite-reliability.md",
+      "required_answer_concepts": [
+        ["WAL", "write ahead logging"],
+        ["readers"],
+        ["writer", "writers"]
+      ]
+    },
+    {
+      "id": "trace-percentile-latency",
+      "category": "supported_observability",
+      "split": "evaluation",
+      "prompt": "Why did my observability notes recommend p95 instead of relying only on average latency?",
+      "expected_tools": ["search_evidence"],
+      "expected_source": "trace-observability.md",
+      "required_answer_concepts": [
+        ["p95", "95th percentile"],
+        ["slow requests", "slower requests", "tail latency"]
+      ]
+    },
+    {
+      "id": "unsupported-cache-encryption",
+      "category": "partial_overlap_no_evidence",
+      "split": "evaluation",
+      "prompt": "What key-rotation strategy do my cache documents recommend?",
+      "expected_tools": ["search_evidence"],
+      "expected_abstention": true
+    },
+    {
+      "id": "queue-backpressure-paraphrase",
+      "category": "supported_paraphrase",
+      "split": "evaluation",
+      "prompt": "What did I record about handling incoming work that arrives faster than it can be processed?",
+      "expected_tools": ["search_evidence"],
+      "expected_source": "queue-backpressure.md",
+      "required_answer_concepts": [
+        ["bounded queue"],
+        ["backpressure"]
+      ]
+    }
+  ]
+}
