@@ -1,6 +1,7 @@
 """HTTP request and response schemas."""
 
 from datetime import date, datetime
+from typing import Literal
 
 from pydantic import (
     BaseModel,
@@ -262,3 +263,116 @@ class MorningRecapResponse(BaseModel):
     work_date: date
     notes: list[NoteResponse]
     unfinished_tasks: list[TaskResponse]
+
+
+class AgentRunRequest(BaseModel):
+    """Validated input for one product agent turn."""
+
+    message: str = Field(min_length=1, max_length=8_000)
+    max_steps: int = Field(default=5, ge=1, le=12)
+    include_trace: bool = False
+
+    @field_validator("message")
+    @classmethod
+    def message_must_not_be_blank(cls, value: str) -> str:
+        """Reject whitespace-only prompts."""
+
+        message = value.strip()
+        if not message:
+            raise ValueError("message must not be blank")
+        return message
+
+
+class AgentCitationResponse(BaseModel):
+    """Public citation metadata attached to a final answer."""
+
+    source_locator: str
+    source_content_hash: str
+    chunk_ids: tuple[int, ...]
+
+
+class AgentTokenUsageResponse(BaseModel):
+    """Cumulative provider-reported token usage for one run."""
+
+    input_tokens: int = Field(ge=0)
+    output_tokens: int = Field(ge=0)
+
+
+class AgentToolCallResponse(BaseModel):
+    """One tool invocation recorded in a run trace."""
+
+    call_id: str
+    tool_name: str
+    arguments: dict[str, object]
+
+
+class AgentStepTraceResponse(BaseModel):
+    """One model/tool step from an in-memory run trace."""
+
+    step_number: int = Field(gt=0)
+    kind: str
+    tool_call: AgentToolCallResponse | None = None
+    answer: str | None = None
+    abstained: bool | None = None
+    citations: tuple[AgentCitationResponse, ...] | None = None
+    observation: str | None = None
+    usage: AgentTokenUsageResponse
+    model_duration_ms: float = Field(ge=0.0)
+    tool_duration_ms: float | None = Field(default=None, ge=0.0)
+    error: str | None = None
+
+
+class AgentPendingNoteConfirmation(BaseModel):
+    """A save_note preview waiting for explicit user approval."""
+
+    title: str = ""
+    content: str
+    work_date: date
+    project_id: int | None = Field(default=None, gt=0)
+    message: str
+
+
+class AgentConfirmNoteRequest(BaseModel):
+    """Client-driven confirmation of a previously previewed note."""
+
+    title: str = Field(default="", max_length=200)
+    content: str = Field(min_length=1, max_length=8_000)
+    work_date: date
+    project_id: int | None = Field(default=None, gt=0)
+    confirmed: Literal[True] = Field(
+        description=(
+            "Must be true. False is rejected; use /agent/run for previews."
+        ),
+    )
+
+    @field_validator("content")
+    @classmethod
+    def content_must_not_be_blank(cls, value: str) -> str:
+        """Reject whitespace-only note content."""
+
+        if not value.strip():
+            raise ValueError("content must not be blank")
+        return value
+
+
+class AgentConfirmNoteResponse(BaseModel):
+    """Result of confirming a pending note write."""
+
+    written: bool
+    note: NoteResponse
+
+
+class AgentRunResponse(BaseModel):
+    """Public result of one bounded agent run."""
+
+    status: str
+    answer: str | None = None
+    abstained: bool | None = None
+    citations: tuple[AgentCitationResponse, ...] = ()
+    usage: AgentTokenUsageResponse
+    step_count: int = Field(ge=0)
+    error: str | None = None
+    tools: tuple[str, ...] = ()
+    pending_confirmation: AgentPendingNoteConfirmation | None = None
+    trace: tuple[AgentStepTraceResponse, ...] | None = None
+

@@ -59,6 +59,32 @@ python -m internmemory.hybrid_evaluation --split evaluation
 pytest
 ```
 
+## Run the agent
+
+With `GROQ_API_KEY` set, `POST /agent/run` executes one bounded turn using the
+full tool registry (`search_notes`, `search_evidence`, `get_daily_summary`,
+`save_note`):
+
+```bash
+curl -X POST http://127.0.0.1:8000/agent/run \
+  -H "Content-Type: application/json" \
+  -d '{"message":"What did I note about batching?","include_trace":true}'
+```
+
+Without a model provider the endpoint returns `503`. Storage and search
+endpoints stay available without an LLM.
+
+When `save_note` returns a preview, the run includes `pending_confirmation`.
+Persist only after explicit approval (no second LLM call required):
+
+```bash
+curl -X POST http://127.0.0.1:8000/agent/confirm-note \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Draft","content":"Finished batching notes.","work_date":"2026-11-22","confirmed":true}'
+```
+
+`confirmed` must be `true`; `false` is rejected.
+
 ## Optional Groq provider
 
 The agent harness can use Groq's free hosted API through the

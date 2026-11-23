@@ -15,6 +15,16 @@ from fastapi import (
     status,
 )
 
+from internmemory.agent_models import (
+    AgentState,
+    FinalAnswerAction,
+    ToolCallAction,
+)
+from internmemory.agent_service import (
+    AgentService,
+    AgentUnavailableError,
+    extract_pending_note_confirmation,
+)
 from internmemory.chunk_repository import ChunkRepository
 from internmemory.ingestion_service import IngestionService
 from internmemory.note_repository import NoteRepository
@@ -26,6 +36,15 @@ from internmemory.recap_service import RecapService
 from internmemory.retrieval_service import RetrievalService
 from internmemory.task_repository import TaskRepository
 from internmemory.schemas import (
+    AgentCitationResponse,
+    AgentConfirmNoteRequest,
+    AgentConfirmNoteResponse,
+    AgentPendingNoteConfirmation,
+    AgentRunRequest,
+    AgentRunResponse,
+    AgentStepTraceResponse,
+    AgentTokenUsageResponse,
+    AgentToolCallResponse,
     DocumentSearchResultResponse,
     EvidenceGroupResponse,
     HealthResponse,
@@ -156,11 +175,196 @@ RetrievalServiceDependency = Annotated[
 ]
 
 
+def get_agent_service(request: Request) -> AgentService:
+    """Return the product agent service configured for this application."""
+
+    service: AgentService = request.app.state.agent_service
+    return service
+
+
+AgentServiceDependency = Annotated[
+    AgentService,
+    Depends(get_agent_service),
+]
+
+
+def _serialize_agent_run(
+    service: AgentService,
+    state: AgentState,
+    *,
+    include_trace: bool,
+) -> AgentRunResponse:
+    """Convert harness state into the public HTTP response."""
+
+    final_action = state.final_action
+    citations: tuple[AgentCitationResponse, ...] = ()
+    abstained: bool | None = None
+    if isinstance(final_action, FinalAnswerAction):
+        abstained = final_action.abstained
+        citations = tuple(
+            AgentCitationResponse(
+                source_locator=citation.source_locator,
+                source_content_hash=citation.source_content_hash,
+                chunk_ids=citation.chunk_ids,
+            )
+            for citation in final_action.citations
+        )
+
+    trace: tuple[AgentStepTraceResponse, ...] | None = None
+    if include_trace:
+        steps: list[AgentStepTraceResponse] = []
+        for step in state.trace:
+            tool_call: AgentToolCallResponse | None = None
+            answer: str | None = None
+            step_abstained: bool | None = None
+            step_citations: (
+                tuple[AgentCitationResponse, ...] | None
+            ) = None
+            kind = "error" if step.error else "unknown"
+            if isinstance(step.action, ToolCallAction):
+                kind = "tool_call"
+                tool_call = AgentToolCallResponse(
+                    call_id=step.action.call_id,
+                    tool_name=step.action.tool_name,
+                    arguments=dict(step.action.arguments),
+                )
+            elif isinstance(step.action, FinalAnswerAction):
+                kind = "final_answer"
+                answer = step.action.content
+                step_abstained = step.action.abstained
+                step_citations = tuple(
+                    AgentCitationResponse(
+                        source_locator=citation.source_locator,
+                        source_content_hash=(
+                            citation.source_content_hash
+                        ),
+                        chunk_ids=citation.chunk_ids,
+                    )
+                    for citation in step.action.citations
+                )
+            steps.append(
+                AgentStepTraceResponse(
+                    step_number=step.step_number,
+                    kind=kind,
+                    tool_call=tool_call,
+                    answer=answer,
+                    abstained=step_abstained,
+                    citations=step_citations,
+                    observation=(
+                        None
+                        if step.tool_observation is None
+                        else step.tool_observation.content
+                    ),
+                    usage=AgentTokenUsageResponse(
+                        input_tokens=step.usage.input_tokens,
+                        output_tokens=step.usage.output_tokens,
+                    ),
+                    model_duration_ms=step.model_duration_ms,
+                    tool_duration_ms=step.tool_duration_ms,
+                    error=step.error,
+                )
+            )
+        trace = tuple(steps)
+
+    pending = extract_pending_note_confirmation(state)
+    pending_confirmation = None
+    if pending is not None:
+        pending_confirmation = AgentPendingNoteConfirmation(
+            title=pending.title,
+            content=pending.content,
+            work_date=pending.work_date,
+            project_id=pending.project_id,
+            message=pending.message,
+        )
+
+    return AgentRunResponse(
+        status=state.status.value,
+        answer=state.final_answer,
+        abstained=abstained,
+        citations=citations,
+        usage=AgentTokenUsageResponse(
+            input_tokens=state.usage.input_tokens,
+            output_tokens=state.usage.output_tokens,
+        ),
+        step_count=state.step_count,
+        error=state.error,
+        tools=service.tool_names,
+        pending_confirmation=pending_confirmation,
+        trace=trace,
+    )
+
+
 @router.get("/health", response_model=HealthResponse)
 def health() -> HealthResponse:
     """Report whether the API process can serve requests."""
 
     return HealthResponse(status="ok")
+
+
+@router.post("/agent/run", response_model=AgentRunResponse)
+def run_agent(
+    request: AgentRunRequest,
+    service: AgentServiceDependency,
+) -> AgentRunResponse:
+    """Run one bounded agent turn with the full product tool registry."""
+
+    try:
+        state = service.run(
+            request.message,
+            max_steps=request.max_steps,
+        )
+    except AgentUnavailableError as error:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=str(error),
+        ) from error
+    except ValueError as error:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail=str(error),
+        ) from error
+
+    return _serialize_agent_run(
+        service,
+        state,
+        include_trace=request.include_trace,
+    )
+
+
+@router.post(
+    "/agent/confirm-note",
+    response_model=AgentConfirmNoteResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def confirm_agent_note(
+    request: AgentConfirmNoteRequest,
+    service: AgentServiceDependency,
+) -> AgentConfirmNoteResponse:
+    """Persist a note only after explicit client confirmation."""
+
+    try:
+        note = service.confirm_note(
+            title=request.title,
+            content=request.content,
+            work_date=request.work_date,
+            project_id=request.project_id,
+            confirmed=request.confirmed,
+        )
+    except ValueError as error:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail=str(error),
+        ) from error
+    except sqlite3.IntegrityError as error:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="The note conflicts with existing data",
+        ) from error
+
+    return AgentConfirmNoteResponse(
+        written=True,
+        note=NoteResponse.model_validate(note),
+    )
 
 
 @router.get("/recap/morning", response_model=MorningRecapResponse)

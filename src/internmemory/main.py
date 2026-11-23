@@ -7,10 +7,16 @@ from pathlib import Path
 
 from fastapi import FastAPI
 
+from internmemory.agent_service import (
+    AgentService,
+    build_default_tool_registry,
+)
 from internmemory.api import router
 from internmemory.chunk_repository import ChunkRepository
 from internmemory.database import initialize_database
+from internmemory.groq_provider import GroqModelProvider
 from internmemory.ingestion_service import IngestionService
+from internmemory.model_provider import ModelProvider
 from internmemory.note_repository import NoteRepository
 from internmemory.project_repository import ProjectRepository
 from internmemory.public_ingestion_service import (
@@ -32,6 +38,23 @@ DEFAULT_PUBLIC_DOCUMENT_DOMAINS = {
 }
 
 
+def _resolve_model_provider(
+    model_provider: ModelProvider | None,
+    *,
+    enable_groq: bool,
+) -> ModelProvider | None:
+    """Use an injected provider, otherwise optional Groq from the environment."""
+
+    if model_provider is not None:
+        return model_provider
+    if not enable_groq:
+        return None
+    try:
+        return GroqModelProvider.from_environment()
+    except ValueError:
+        return None
+
+
 def create_app(
     database_path: str | Path = DEFAULT_DATABASE_PATH,
     *,
@@ -41,6 +64,8 @@ def create_app(
     max_source_bytes: int = 1_000_000,
     max_chunk_chars: int = 1_200,
     public_document_domains: set[str] | None = None,
+    model_provider: ModelProvider | None = None,
+    enable_groq: bool = True,
 ) -> FastAPI:
     """Build an application configured for one database."""
 
@@ -74,6 +99,18 @@ def create_app(
         max_bytes=max_source_bytes,
         max_chunk_chars=max_chunk_chars,
     )
+    agent_service = AgentService(
+        build_default_tool_registry(
+            note_repository,
+            retrieval_service,
+            recap_service,
+        ),
+        note_repository,
+        _resolve_model_provider(
+            model_provider,
+            enable_groq=enable_groq,
+        ),
+    )
 
     @asynccontextmanager
     async def lifespan(_: FastAPI) -> AsyncIterator[None]:
@@ -94,6 +131,7 @@ def create_app(
     application.state.recap_service = recap_service
     application.state.retrieval_service = retrieval_service
     application.state.public_ingestion_service = public_ingestion_service
+    application.state.agent_service = agent_service
     application.include_router(router)
     return application
 

@@ -256,6 +256,15 @@
   cannot complete the confirmed write.
 - JSON tool arguments send dates as strings, so strict Pydantic validation needs
   an intentional ISO-date parse step before type checking.
+- Cap successful reads rather than hiding tools after the first hit. Two
+  successes cover notes+docs questions; more usually means duplicate search
+  waste. Abstentions should not count as successes.
+- Product agents should assemble tools once at app startup and inject the
+  model provider. Keeping the HTTP layer thin preserves local-first usefulness
+  when no API key is present (`503` on `/agent/run` only).
+- Prefer client-driven write confirmation over a second LLM turn. Surface the
+  preview, require an explicit confirm API with `confirmed=true`, and keep the
+  model out of the persistence path.
 
 ## Clarifications and Corrections
 

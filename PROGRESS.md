@@ -33,7 +33,7 @@ Phases 1 and 2 are complete. InternMemory now includes:
 
 ## Verification
 
-- Latest test run: `132 passed in 2.75s`
+- Latest test run: `139 passed in 2.50s`
 - IDE diagnostics: no lint errors
 - Local SQLite version tested: `3.40.1` with FTS5 support
 - Retrieval corpus: 36 queries in balanced calibration, regression, and fresh
@@ -124,13 +124,17 @@ Phases 1 and 2 are complete. InternMemory now includes:
   phrase grader rejected `tail latency`. Treat this split as consumed
 - Added `search_notes`, `get_daily_summary`, and confirmation-gated `save_note`
   tools. Preview writes keep tools available until `confirmed=true`
+- Multi-tool policy now allows up to two successful reads before forcing
+  synthesis; confirmed writes still end the tool phase immediately
+- Product `POST /agent/run` wires the full tool registry through `AgentService`;
+  Groq loads from the environment when present, otherwise the endpoint is `503`
+- `pending_confirmation` on agent runs plus `POST /agent/confirm-note` for
+  client-driven `save_note` approval without a second model call
 
 ## Current Task
 
-Phase 3 has a measured development score of `1.0` and a refreshed held-out
-score of `0.75`. Next product work can add remaining Phase 3 tools or harden
-evaluation labels on a new development set without re-scoring this frozen
-split as if it were still unseen.
+Phase 3 agent product surface (tools, entrypoint, confirmation) is in place.
+Next is Phase 4 browser/MCP work, or optional durable redacted trace export.
 
 ## Known Limitations
 
@@ -153,8 +157,8 @@ split as if it were still unseen.
 - Token-usage limits are reactive until a real adapter applies output limits
 - Deterministic answer-term checks cannot detect every unsupported claim
 - The current harness supports one sequential tool call per model step
-- The current policy permits one successful tool result per run; future
-  multi-tool tasks will need an explicit evidence-completeness policy
+- Successful reads are capped at two per run; richer multi-hop planning still
+  needs an explicit evidence-completeness policy
 - Final synthesis citations currently cover retrieved evidence groups rather
   than mapping each individual answer claim to one passage
 - A transient Groq disconnect is reported as an execution failure; automatic
@@ -163,6 +167,6 @@ split as if it were still unseen.
 
 ## Next Steps
 
-1. Decide multi-tool policy when a question needs both notes and evidence.
-2. Wire the full tool set into a product-facing agent entrypoint/API.
-3. Keep browser/MCP work for Phase 4.
+1. Begin Phase 4: controlled browser research / MCP.
+2. Optional: durable redacted agent-trace export.
+3. Optional: signed confirmation tokens for draft integrity.

@@ -261,7 +261,8 @@ def test_runner_keeps_tools_after_one_abstention_for_rewrite() -> None:
     assert state.status is AgentStatus.COMPLETED
     assert len(executor.actions) == 2
     assert provider.requests[1].tools
-    assert provider.requests[2].tools == ()
+    # One successful read remains below the default max of two.
+    assert provider.requests[2].tools
 
 
 def test_runner_hides_tools_after_second_abstention() -> None:
@@ -289,6 +290,49 @@ def test_runner_hides_tools_after_second_abstention() -> None:
     )
 
     state = AgentRunner(provider, executor).run("Unsupported question")
+
+    assert state.status is AgentStatus.COMPLETED
+    assert len(executor.actions) == 2
+    assert provider.requests[1].tools
+    assert provider.requests[2].tools == ()
+
+
+def test_runner_allows_two_successful_reads_then_hides_tools() -> None:
+    first = json.dumps(
+        {
+            "ok": True,
+            "result": {
+                "abstained": False,
+                "notes": [{"id": 1, "content": "personal note"}],
+            },
+        }
+    )
+    second = json.dumps(
+        {
+            "ok": True,
+            "result": {
+                "abstained": False,
+                "evidence": [{"source": {"locator": "batching.md"}}],
+            },
+        }
+    )
+    provider = ScriptedModelProvider(
+        [
+            tool_call("call-1"),
+            tool_call("call-2"),
+            ModelResponse(
+                action=FinalAnswerAction(
+                    content="Combined note and document answer."
+                ),
+                usage=TokenUsage(input_tokens=20, output_tokens=4),
+            ),
+        ]
+    )
+    executor = RecordingToolExecutor(observations=[first, second])
+
+    state = AgentRunner(provider, executor).run(
+        "Connect my note to the docs"
+    )
 
     assert state.status is AgentStatus.COMPLETED
     assert len(executor.actions) == 2

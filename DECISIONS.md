@@ -313,6 +313,51 @@
   cases, increasing tokens. It preserves the lexical grounding contract and
   avoids trusting topical but unsupported neighbors.
 
+## ADR-031: Confirm note writes via a client-driven endpoint
+
+- **Problem:** `save_note` previews must not persist until a human approves, but
+  a second LLM turn is expensive and can invent or alter draft fields.
+- **Decision:** Surface unresolved previews as `pending_confirmation` on
+  `/agent/run`, and persist only through `POST /agent/confirm-note` with
+  `confirmed=true`. The confirm path writes through `NoteRepository` without a
+  model call.
+- **Evidence:** Scripted HTTP tests cover preview surfacing with no DB write,
+  rejection of `confirmed=false`, and successful persistence after approval.
+- **Tradeoff:** Clients must echo the preview fields. A signed confirmation
+  token would bind draft integrity more tightly, but adds crypto/session state
+  before a UI exists. Multi-turn LLM resume remains possible later for chat UX.
+
+## ADR-030: Expose the product agent as POST /agent/run
+
+
+- **Problem:** Tools and the harness existed only in evals and unit tests, so
+  the product API could not ask grounded questions over notes and documents.
+- **Decision:** Assemble a default tool registry in `AgentService`, wire it in
+  `create_app`, and expose `POST /agent/run`. Inject a `ModelProvider` for
+  tests; optionally load Groq from `GROQ_API_KEY`. Return `503` when no
+  provider is configured so local-first storage still works without an LLM.
+- **Evidence:** Scripted HTTP tests verify the four-tool registry, note search,
+  trace serialization, blank-message rejection, and unavailable-provider
+  behavior.
+- **Tradeoff:** Single-turn HTTP keeps confirmation UX for later. A session
+  store would enable multi-turn `save_note` approval but adds state complexity
+  before the write path is productized.
+
+## ADR-029: Cap successful reads at two per agent run
+
+
+- **Problem:** Hiding tools after the first successful read prevents questions
+  that need both personal notes and document evidence. Leaving tools forever
+  reintroduces duplicate-search waste.
+- **Decision:** Allow up to two successful read results per run, then hide
+  tools and force synthesis. Abstentions still permit one rewrite and do not
+  count as successes. Confirmed writes immediately end the tool phase.
+  Pending confirmation previews keep tools available.
+- **Evidence:** Deterministic tests cover two successful reads followed by
+  tool removal, rewrite-after-abstention, and confirmation-gated writes.
+- **Tradeoff:** A model can still spend a second read poorly, but the bound
+  is explicit, cheap to evaluate, and unblocks mixed notes+docs questions.
+
 ## ADR-028: Keep the refreshed frozen agent score at 0.75
 
 - **Problem:** The new held-out paraphrase case retrieved and cited the right

@@ -184,7 +184,7 @@ def test_scripted_agent_receives_search_evidence_observation(
     tool_observation = provider.requests[1].messages[-1]
     assert tool_observation.tool_call_id == "call-1"
     assert "batching.md" in tool_observation.content
-    assert provider.requests[1].tools == ()
+    assert provider.requests[1].tools
 
 
 def test_scripted_agent_receives_explicit_abstention(
@@ -269,7 +269,7 @@ def test_scripted_agent_can_correct_invalid_tool_arguments(
     assert invalid_observation["error"]["type"] == "invalid_arguments"
     assert corrected_observation["ok"] is True
     assert provider.requests[1].tools
-    assert provider.requests[2].tools == ()
+    assert provider.requests[2].tools
     assert state.status is AgentStatus.COMPLETED
     assert state.step_count == 3
 

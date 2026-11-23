@@ -11,6 +11,8 @@ It must remain useful without an LLM.
 ```text
 FastAPI
 ├── Pydantic request/response validation
+├── AgentService + POST /agent/run
+│   └── Tool registry → notes, evidence, recap, confirmed save
 ├── Local and allowlisted-public ingestion services
 ├── Retrieval services
 │   ├── SQLite FTS5/BM25
@@ -20,7 +22,7 @@ FastAPI
 └── SQLite source-of-truth tables and FTS5 index
 ```
 
-The future agent harness will call these capabilities through explicit tools.
+The agent harness calls application capabilities through explicit tools.
 Storage and retrieval remain independent of model providers.
 
 ## Current Capabilities
@@ -40,6 +42,9 @@ Storage and retrieval remain independent of model providers.
 - Allowlisted HTTPS documentation ingestion with bounded fetches
 - Versioned fictional retrieval corpus and labeled evaluation runner
 - Temporary-database integration tests
+- Bounded agent harness with typed tools and optional Groq provider
+- Product `POST /agent/run` over the full tool registry
+- Client-driven `POST /agent/confirm-note` for confirmation-gated writes
 
 ## Requirements
 
