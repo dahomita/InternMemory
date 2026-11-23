@@ -1,0 +1,43 @@
+DECISIONS.md
+  s_cfe57713647727::t_bf1eb796048e27 316-360
+LEARNING.md
+  s_cfe57713647727::t_2cabfdb208805a 259-267
+PROGRESS.md
+  s_cfe57713647727::t_b001d1122ce566 36,127-132,136-137,160-161,170-172
+PROJECT.md
+  s_cfe57713647727::t_c142340e9f3b1a 14-15,25,45-47
+README.md
+  s_cfe57713647727::t_4766f97d10a346 62-87
+src/internmemory/agent_runner.py
+  s_cfe57713647727::t_18eada4f0b5a50 26-29,32-36,73,77-78,83,116,256,258-261,311-312
+src/internmemory/agent_service.py
+  s_cfe57713647727::t_ec5512435d79bc 1-196
+src/internmemory/api.py
+  s_cfe57713647727::t_b156cc8e95ed05 18-27,39-47,178-296,304-369
+src/internmemory/main.py
+  s_cfe57713647727::t_51c464d4e764b2 10-13,17,19,41-57,67-68,102-113,134
+src/internmemory/schemas.py
+  s_cfe57713647727::t_416f94d7286aad 4,266-378
+tests/test_agent_api.py
+  s_cfe57713647727::t_24c8eee317a5be 1-259
+tests/test_agent_runner.py
+  s_cfe57713647727::t_0840d4b42fb1fe 264-265,298-340
+tests/test_agent_tools.py
+  s_cfe57713647727::t_27c3309b6c60d8 187,272
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8a8503a5cacb9cb9f96f1c95975e239b68998af4",
+  "prompts": {},
+  "sessions": {
+    "s_cfe57713647727": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "3c5540e7-abd4-431d-8200-1b40efcb5929",
+        "model": "unknown"
+      },
+      "human_author": "Daho Mita <dahomita17062006@gmail.com>"
+    }
+  }
+}
