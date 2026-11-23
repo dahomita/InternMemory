@@ -1,0 +1,27 @@
+LEARNING.md
+  s_cfe57713647727::t_2fae6d6f0a5e08 251-258
+PROGRESS.md
+  s_cfe57713647727::t_f754ec7f8a9f9f 36,125-126,166-167
+src/internmemory/agent_runner.py
+  s_cfe57713647727::t_92f06bd31daed0 24-39,44-47,299-300,306-312
+src/internmemory/agent_tools.py
+  s_cfe57713647727::t_cde61917a75669 1,3,6,9-10,15-41,62-150,208-324
+tests/test_agent_tools.py
+  s_cfe57713647727::t_08a2ed55f25348 4,14-20,25-26,29,58-114,275-418
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "42ba2c17de6ad7ad1e014bf01bc740795834cc39",
+  "prompts": {},
+  "sessions": {
+    "s_cfe57713647727": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "3c5540e7-abd4-431d-8200-1b40efcb5929",
+        "model": "unknown"
+      },
+      "human_author": "Daho Mita <dahomita17062006@gmail.com>"
+    }
+  }
+}
