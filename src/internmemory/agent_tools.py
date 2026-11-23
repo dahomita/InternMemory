@@ -77,7 +77,10 @@ def create_search_evidence_tool(
         name="search_evidence",
         description=(
             "Search stored engineering documents using literal keywords. "
-            "Use concise source terms, not a full natural-language question. "
+            "Use concise source terms likely to appear in notes, not a full "
+            "natural-language paraphrase. If a search abstains, reformulate "
+            "once with short systems nouns (queue, backpressure, latency, "
+            "retry, timeout, cache) instead of restating the question. "
             "Returns cited passages or abstains when lexical support is weak."
         ),
         input_model=SearchEvidenceInput,

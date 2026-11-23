@@ -234,6 +234,20 @@
   required, while human-approved alternatives and punctuation normalization
   allow equivalent expressions. Their quality still depends on complete,
   carefully reviewed labels.
+- Semantic candidate generation cannot fix zero-overlap paraphrases if the
+  final gate still requires user-query term coverage. In that setting, either
+  the gate fails the paraphrase or relaxing the gate reintroduces unsupported
+  nearest-neighbor answers.
+- Rewrite-then-lexical is often safer than semantic-as-evidence: the model
+  proposes document vocabulary, keyword search and coverage remain the
+  grounding contract, and a bounded second attempt limits token spend.
+- Held-out improvement should be judged against a refreshed split. After A→B,
+  the new frozen set scored `0.75` versus the earlier consumed split's `0.5`,
+  with the remaining miss a contiguous-phrase grader gap rather than missing
+  evidence.
+- Contiguous phrase checks fail when a valid answer inserts a parenthetical,
+  as in `tail (p95) latency` versus required `tail latency`. Concept labels
+  need either looser multi-token rules or explicit alternatives.
 
 ## Clarifications and Corrections
 

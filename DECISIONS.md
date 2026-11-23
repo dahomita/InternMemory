@@ -291,3 +291,39 @@
 - **Tradeoff:** Refreshing evaluation data adds labeling work and makes the
   headline score less convenient, but prevents test-set tuning from being
   mistaken for a broadly better agent.
+
+## ADR-027: Prefer rewrite-then-lexical over semantic evidence fallback
+
+- **Problem:** Zero-overlap paraphrases abstain under coverage-gated keyword
+  search. Semantic nearest neighbors can surface the right passage, but using
+  them as grounded evidence without a lexical gate recreates the held-out
+  no-answer failure mode measured in Phase 2.
+- **Options:** Semantic candidate union with the existing query-term gate;
+  similarity fallback after keyword abstention; model query rewrite then the
+  same lexical evidence path.
+- **Decision:** Implement A→B harness policy. Keep tools available after one
+  abstaining search so the model can reformulate into document vocabulary.
+  Hide tools after real evidence or a second abstention. Do not promote
+  semantic similarity into the grounded `/search/evidence` product path yet.
+- **Evidence:** Query-term coverage cannot pass paraphrases that share no
+  tokens with the source. Similarity-only abstention previously failed held-out
+  no-answer checks. Deterministic tests cover one rewrite opportunity and a
+  hard stop after two abstentions.
+- **Tradeoff:** Adds at most one extra search on hard paraphrases and no-answer
+  cases, increasing tokens. It preserves the lexical grounding contract and
+  avoids trusting topical but unsupported neighbors.
+
+## ADR-028: Keep the refreshed frozen agent score at 0.75
+
+- **Problem:** The new held-out paraphrase case retrieved and cited the right
+  evidence, but failed grounding because the answer wrote `tail (p95) latency`
+  instead of the contiguous phrase `tail latency`.
+- **Decision:** Record overall held-out success as `0.75` for this candidate.
+  Do not change prompts or graders and re-report a higher score on the same
+  frozen cases. Future label improvements belong on a new development set and
+  a later held-out refresh.
+- **Evidence:** SQLite WAL, p95 observability, and unsupported cache-encryption
+  passed. Batching paraphrase had `evidence_correct` and `citation_correct`
+  true with primary failure `grounding`.
+- **Tradeoff:** Leaves a known evaluator brittleness visible, which is better
+  than silently overfitting the held-out set.

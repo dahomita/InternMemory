@@ -1,5 +1,6 @@
 """Tests for bounded model-independent agent execution."""
 
+import json
 from collections.abc import Sequence
 
 import pytest
@@ -21,8 +22,13 @@ from internmemory.model_provider import ScriptedModelProvider
 class RecordingToolExecutor:
     """Small deterministic executor used to isolate runner behavior."""
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        *,
+        observations: Sequence[str] | None = None,
+    ) -> None:
         self.actions: list[ToolCallAction] = []
+        self._observations = list(observations or [])
         self._definitions = (
             ToolDefinition(
                 name="search_evidence",
@@ -37,9 +43,13 @@ class RecordingToolExecutor:
 
     def execute(self, action: ToolCallAction) -> AgentMessage:
         self.actions.append(action)
+        if self._observations:
+            content = self._observations.pop(0)
+        else:
+            content = '{"results": []}'
         return AgentMessage(
             role=MessageRole.TOOL,
-            content='{"results": []}',
+            content=content,
             tool_call_id=action.call_id,
         )
 
@@ -214,3 +224,73 @@ def test_runner_stops_after_provider_reports_excessive_token_usage() -> None:
     assert state.final_answer is None
     assert state.usage == TokenUsage(input_tokens=12, output_tokens=5)
     assert state.trace[0].error is not None
+
+
+def test_runner_keeps_tools_after_one_abstention_for_rewrite() -> None:
+    abstained = json.dumps(
+        {
+            "ok": True,
+            "result": {"abstained": True, "evidence": []},
+        }
+    )
+    evidence = json.dumps(
+        {
+            "ok": True,
+            "result": {
+                "abstained": False,
+                "evidence": [{"source": {"locator": "queue.md"}}],
+            },
+        }
+    )
+    provider = ScriptedModelProvider(
+        [
+            tool_call("call-1"),
+            tool_call("call-2"),
+            ModelResponse(
+                action=FinalAnswerAction(content="Bounded queue answer."),
+                usage=TokenUsage(input_tokens=20, output_tokens=4),
+            ),
+        ]
+    )
+    executor = RecordingToolExecutor(
+        observations=[abstained, evidence],
+    )
+
+    state = AgentRunner(provider, executor).run("Paraphrase question")
+
+    assert state.status is AgentStatus.COMPLETED
+    assert len(executor.actions) == 2
+    assert provider.requests[1].tools
+    assert provider.requests[2].tools == ()
+
+
+def test_runner_hides_tools_after_second_abstention() -> None:
+    abstained = json.dumps(
+        {
+            "ok": True,
+            "result": {"abstained": True, "evidence": []},
+        }
+    )
+    provider = ScriptedModelProvider(
+        [
+            tool_call("call-1"),
+            tool_call("call-2"),
+            ModelResponse(
+                action=FinalAnswerAction(
+                    content="No supporting evidence.",
+                    abstained=True,
+                ),
+                usage=TokenUsage(input_tokens=20, output_tokens=4),
+            ),
+        ]
+    )
+    executor = RecordingToolExecutor(
+        observations=[abstained, abstained],
+    )
+
+    state = AgentRunner(provider, executor).run("Unsupported question")
+
+    assert state.status is AgentStatus.COMPLETED
+    assert len(executor.actions) == 2
+    assert provider.requests[1].tools
+    assert provider.requests[2].tools == ()

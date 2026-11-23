@@ -42,6 +42,18 @@
       "expected_abstention": true
     },
     {
+      "id": "queue-backpressure-paraphrase",
+      "category": "supported_paraphrase",
+      "split": "development",
+      "prompt": "What did I record about handling incoming work that arrives faster than it can be processed?",
+      "expected_tools": ["search_evidence"],
+      "expected_source": "queue-backpressure.md",
+      "required_answer_concepts": [
+        ["bounded queue"],
+        ["backpressure", "back pressure"]
+      ]
+    },
+    {
       "id": "sqlite-wal-concurrency",
       "category": "supported_abbreviation",
       "split": "evaluation",
@@ -75,15 +87,15 @@
       "expected_abstention": true
     },
     {
-      "id": "queue-backpressure-paraphrase",
+      "id": "batching-throughput-paraphrase",
       "category": "supported_paraphrase",
       "split": "evaluation",
-      "prompt": "What did I record about handling incoming work that arrives faster than it can be processed?",
+      "prompt": "What downside did I note when grouping many requests together to raise overall processing rate?",
       "expected_tools": ["search_evidence"],
-      "expected_source": "queue-backpressure.md",
+      "expected_source": "batching.md",
       "required_answer_concepts": [
-        ["bounded queue"],
-        ["backpressure"]
+        ["batch", "batching"],
+        ["tail latency"]
       ]
     }
   ]

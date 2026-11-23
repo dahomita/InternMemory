@@ -300,16 +300,56 @@ def test_grounding_accepts_labeled_equivalent_phrases() -> None:
     assert result.grounding_correct is True
 
 
+def test_grounding_accepts_hyphenated_concept_split() -> None:
+    expectation = AgentEvalExpectation(
+        expected_tools=("search_evidence",),
+        expected_source="batching.md",
+        required_answer_concepts=(
+            ("batch", "batching"),
+            ("backpressure", "back pressure"),
+        ),
+    )
+    payload = evidence_payload()
+    payload["result"]["evidence"][0]["chunks"][0]["content"] = (
+        "A batch path applies backpressure under overload."
+    )
+    state = run_with(
+        FinalAnswerAction(
+            content=(
+                "Use a batch with back-pressure when producers "
+                "outpace consumers."
+            ),
+            citations=(
+                EvidenceCitation(
+                    source_locator="batching.md",
+                    source_content_hash="source-hash",
+                    chunk_ids=(7,),
+                ),
+            ),
+        ),
+        payload,
+    )
+
+    result = evaluate_agent_state(state, expectation)
+
+    assert result.grounding_correct is True
+
+
 def test_versioned_agent_dataset_has_balanced_frozen_split() -> None:
     project_root = Path(__file__).parents[1]
 
     cases = load_agent_cases(project_root / "evals" / "agent_cases.json")
 
-    assert len(cases) == 8
-    assert sum(case.split == "development" for case in cases) == 4
+    assert len(cases) == 9
+    assert sum(case.split == "development" for case in cases) == 5
     assert sum(case.split == "evaluation" for case in cases) == 4
     assert any(
         case.category == "answer_without_evidence"
+        for case in cases
+    )
+    assert any(
+        case.case_id == "queue-backpressure-paraphrase"
+        and case.split == "development"
         for case in cases
     )
     assert sum(

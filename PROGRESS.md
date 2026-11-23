@@ -33,7 +33,7 @@ Phases 1 and 2 are complete. InternMemory now includes:
 
 ## Verification
 
-- Latest test run: `124 passed in 1.83s`
+- Latest test run: `126 passed in 1.98s`
 - IDE diagnostics: no lint errors
 - Local SQLite version tested: `3.40.1` with FTS5 support
 - Retrieval corpus: 36 queries in balanced calibration, regression, and fresh
@@ -101,14 +101,34 @@ Phases 1 and 2 are complete. InternMemory now includes:
 - Agent dataset version 2 replaces exact required phrases with labeled concept
   groups: every concept remains required, but deterministic alternatives and
   punctuation-normalized forms can satisfy each concept
+- Chose rewrite-then-lexical (A→B) instead of semantic evidence fallback: after
+  one abstaining search, tools remain available for a single reformulation;
+  tools hide after evidence or a second abstention
+- Moved `queue-backpressure-paraphrase` into development and added a fresh
+  held-out `batching-throughput-paraphrase` evaluation case
+- Development aggregate after A→B scored `0.8` (4/5). Exact and cross-chunk
+  cases stayed one-shot; no-evidence cases correctly used two searches then
+  abstained. Queue paraphrase failed when the rewrite stayed conversational
+  and omitted document nouns such as `backpressure`
+- Strengthened reformulation instructions to prefer short systems nouns over
+  restating the user paraphrase
+- Post-instruction development aggregate scored `1.0` overall across five
+  cases; tool efficiency was `0.6` because no-evidence cases used two searches
+  before abstaining. Paraphrase passed in one search. Token use was `6,375`
+  input and `1,599` output
+- Refreshed frozen evaluation scored `0.75` overall (3/4). Completion, tool
+  selection, evidence, citation, and abstention were `1.0`; grounding was
+  `0.75`. Token use was `5,600` input and `1,194` output
+- The only frozen miss was `batching-throughput-paraphrase`: rewrite found
+  evidence, but the answer wrote `tail (p95) latency`, so the contiguous
+  phrase grader rejected `tail latency`. Treat this split as consumed
 
 ## Current Task
 
-Phase 3 is in progress. GPT-OSS with one successful retrieval followed by
-plain-text synthesis remains the current candidate. It scored `1.0` on the
-four development cases and `0.5` on the now-consumed four-case frozen split.
-The harness executed reliably, but the result exposed one real paraphrase
-retrieval failure and one overly strict grounding-grade failure.
+Phase 3 has a measured development score of `1.0` and a refreshed held-out
+score of `0.75`. Next product work can add remaining Phase 3 tools or harden
+evaluation labels on a new development set without re-scoring this frozen
+split as if it were still unseen.
 
 ## Known Limitations
 
@@ -141,7 +161,7 @@ retrieval failure and one overly strict grounding-grade failure.
 
 ## Next Steps
 
-1. Decide how lexical tools should handle paraphrased user questions without
-   weakening no-evidence safety.
-2. Add new development cases and create a fresh held-out split before claiming
-   that either improvement generalizes.
+1. Optionally expand concept alternatives on a new development set for phrases
+   interrupted by parentheticals (for example `tail (p95) latency`).
+2. Add remaining Phase 3 tools: notes search, daily summary, confirmed save.
+3. Keep browser/MCP work for Phase 4.
