@@ -33,7 +33,7 @@ Phases 1 and 2 are complete. InternMemory now includes:
 
 ## Verification
 
-- Latest test run: `126 passed in 1.98s`
+- Latest test run: `132 passed in 2.75s`
 - IDE diagnostics: no lint errors
 - Local SQLite version tested: `3.40.1` with FTS5 support
 - Retrieval corpus: 36 queries in balanced calibration, regression, and fresh
@@ -122,6 +122,8 @@ Phases 1 and 2 are complete. InternMemory now includes:
 - The only frozen miss was `batching-throughput-paraphrase`: rewrite found
   evidence, but the answer wrote `tail (p95) latency`, so the contiguous
   phrase grader rejected `tail latency`. Treat this split as consumed
+- Added `search_notes`, `get_daily_summary`, and confirmation-gated `save_note`
+  tools. Preview writes keep tools available until `confirmed=true`
 
 ## Current Task
 
@@ -161,7 +163,6 @@ split as if it were still unseen.
 
 ## Next Steps
 
-1. Optionally expand concept alternatives on a new development set for phrases
-   interrupted by parentheticals (for example `tail (p95) latency`).
-2. Add remaining Phase 3 tools: notes search, daily summary, confirmed save.
+1. Decide multi-tool policy when a question needs both notes and evidence.
+2. Wire the full tool set into a product-facing agent entrypoint/API.
 3. Keep browser/MCP work for Phase 4.

@@ -248,6 +248,14 @@
 - Contiguous phrase checks fail when a valid answer inserts a parenthetical,
   as in `tail (p95) latency` versus required `tail latency`. Concept labels
   need either looser multi-token rules or explicit alternatives.
+- Separate tools for notes, documents, and recaps reduce context noise and make
+  tool-selection evals meaningful. A combined search-everything tool would
+  often return irrelevant stores.
+- Agent writes need an explicit confirmation boundary. Returning a preview with
+  `requires_confirmation=true` must leave tools available; otherwise the model
+  cannot complete the confirmed write.
+- JSON tool arguments send dates as strings, so strict Pydantic validation needs
+  an intentional ISO-date parse step before type checking.
 
 ## Clarifications and Corrections
 
