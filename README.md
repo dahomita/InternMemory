@@ -26,8 +26,12 @@ python -m pip install -e ".[dev,semantic]"
 uvicorn internmemory.main:app --reload
 ```
 
-Open <http://127.0.0.1:8000/health> to check the service or
-<http://127.0.0.1:8000/docs> to explore the generated API documentation.
+Open <http://127.0.0.1:8000/> for the chat UI, <http://127.0.0.1:8000/health>
+to check the service, or <http://127.0.0.1:8000/docs> for OpenAPI docs.
+
+The UI asks through `POST /agent/run`, shows pending note drafts, and saves
+only after you click **Save note** (`POST /agent/confirm-note`). Set
+`GROQ_API_KEY` before asking; notes still load without a model.
 
 Search for grouped, cited evidence:
 

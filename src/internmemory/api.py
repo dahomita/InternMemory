@@ -42,6 +42,7 @@ from internmemory.schemas import (
     AgentPendingNoteConfirmation,
     AgentRunRequest,
     AgentRunResponse,
+    AgentStatusResponse,
     AgentStepTraceResponse,
     AgentTokenUsageResponse,
     AgentToolCallResponse,
@@ -299,6 +300,25 @@ def health() -> HealthResponse:
     """Report whether the API process can serve requests."""
 
     return HealthResponse(status="ok")
+
+
+@router.get("/agent/status", response_model=AgentStatusResponse)
+def agent_status(service: AgentServiceDependency) -> AgentStatusResponse:
+    """Report whether a model provider is configured for agent runs."""
+
+    if service.is_available:
+        return AgentStatusResponse(
+            available=True,
+            tools=service.tool_names,
+        )
+    return AgentStatusResponse(
+        available=False,
+        tools=service.tool_names,
+        detail=(
+            "No model provider is configured. Set GROQ_API_KEY or inject "
+            "a ModelProvider when creating the application."
+        ),
+    )
 
 
 @router.post("/agent/run", response_model=AgentRunResponse)

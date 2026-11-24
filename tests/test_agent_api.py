@@ -46,11 +46,14 @@ def test_agent_run_returns_503_without_model_provider(
     )
 
     with TestClient(app) as client:
+        status_response = client.get("/agent/status")
         response = client.post(
             "/agent/run",
             json={"message": "What did I learn about batching?"},
         )
 
+    assert status_response.status_code == 200
+    assert status_response.json()["available"] is False
     assert response.status_code == 503
     assert "model provider" in response.json()["detail"].lower()
 

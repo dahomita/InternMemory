@@ -265,6 +265,14 @@ class MorningRecapResponse(BaseModel):
     unfinished_tasks: list[TaskResponse]
 
 
+class AgentStatusResponse(BaseModel):
+    """Whether the product agent can accept runs right now."""
+
+    available: bool
+    tools: tuple[str, ...] = ()
+    detail: str | None = None
+
+
 class AgentRunRequest(BaseModel):
     """Validated input for one product agent turn."""
 

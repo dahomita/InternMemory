@@ -294,7 +294,7 @@ def test_groq_provider_flattens_tool_history_for_final_synthesis() -> None:
     ]
     assert "ordinary text" in serialized[0]["content"]
     assert "Use grounded evidence." not in serialized[0]["content"]
-    assert "untrusted evidence" in serialized[-1]["content"]
+    assert "untrusted tool result" in serialized[-1]["content"]
     assert "write the concise final answer" in serialized[-1]["content"]
     assert "final JSON" not in serialized[-1]["content"]
     assert "tool_calls" not in serialized[-1]
@@ -304,6 +304,187 @@ def test_groq_provider_flattens_tool_history_for_final_synthesis() -> None:
     assert isinstance(response.action, FinalAnswerAction)
     assert response.action.citations[0].source_locator == "batching.md"
     assert response.action.citations[0].chunk_ids == (7,)
+
+
+def test_groq_provider_accepts_note_answer_while_tools_remain_available() -> None:
+    transport = FakeJsonTransport(
+        [
+            {
+                "choices": [
+                    {
+                        "message": {
+                            "role": "assistant",
+                            "content": json.dumps(
+                                {
+                                    "answer": (
+                                        "Your note says batching reduced "
+                                        "p95 latency."
+                                    ),
+                                    "abstained": False,
+                                    "citations": [
+                                        {
+                                            "note_id": 1,
+                                            "work_date": "2026-11-22",
+                                        }
+                                    ],
+                                }
+                            ),
+                        }
+                    }
+                ],
+                "usage": {
+                    "prompt_tokens": 180,
+                    "completion_tokens": 30,
+                },
+            }
+        ]
+    )
+    provider = GroqModelProvider("test-key", transport=transport)
+    call = ToolCallAction(
+        call_id="call-1",
+        tool_name="search_notes",
+        arguments={"query": "batching"},
+    )
+    conversation = messages() + [
+        AgentMessage(
+            role=MessageRole.ASSISTANT,
+            content="",
+            tool_call=call,
+        ),
+        AgentMessage(
+            role=MessageRole.TOOL,
+            content=json.dumps(
+                {
+                    "ok": True,
+                    "result": {
+                        "abstained": False,
+                        "notes": [
+                            {
+                                "id": 1,
+                                "title": "Batching",
+                                "content": (
+                                    "Batching reduced p95 latency."
+                                ),
+                            }
+                        ],
+                    },
+                }
+            ),
+            tool_call_id="call-1",
+        ),
+    ]
+
+    response = provider.generate(conversation, tools())
+
+    assert isinstance(response.action, FinalAnswerAction)
+    assert response.action.abstained is False
+    assert response.action.citations == ()
+    assert "p95 latency" in response.action.content
+    assert '{"answer"' not in response.action.content
+
+
+def test_groq_provider_strips_json_and_trailing_tool_markup() -> None:
+    transport = FakeJsonTransport(
+        [
+            {
+                "choices": [
+                    {
+                        "message": {
+                            "role": "assistant",
+                            "content": (
+                                '{"answer":"Batching reduced p95 latency.",'
+                                '"abstained":false,"citations":[]}\n'
+                                "</parameter>\n</function>\n</tool_call>"
+                            ),
+                        }
+                    }
+                ],
+                "usage": {
+                    "prompt_tokens": 160,
+                    "completion_tokens": 28,
+                },
+            }
+        ]
+    )
+    provider = GroqModelProvider("test-key", transport=transport)
+    call = ToolCallAction(
+        call_id="call-1",
+        tool_name="search_notes",
+        arguments={"query": "batching"},
+    )
+    conversation = messages() + [
+        AgentMessage(
+            role=MessageRole.ASSISTANT,
+            content="",
+            tool_call=call,
+        ),
+        AgentMessage(
+            role=MessageRole.TOOL,
+            content=json.dumps(
+                {
+                    "ok": True,
+                    "result": {
+                        "abstained": False,
+                        "notes": [
+                            {
+                                "id": 1,
+                                "content": "Batching reduced p95 latency.",
+                            }
+                        ],
+                    },
+                }
+            ),
+            tool_call_id="call-1",
+        ),
+    ]
+
+    response = provider.generate(conversation, tools())
+
+    assert response.action.content == "Batching reduced p95 latency."
+    assert "</tool_call>" not in response.action.content
+
+
+def test_groq_provider_synthesizes_from_notes_without_document_citations() -> None:
+    transport = FakeJsonTransport([plain_final_response()])
+    provider = GroqModelProvider("test-key", transport=transport)
+    call = ToolCallAction(
+        call_id="call-1",
+        tool_name="search_notes",
+        arguments={"query": "batching"},
+    )
+    conversation = messages() + [
+        AgentMessage(
+            role=MessageRole.ASSISTANT,
+            content="",
+            tool_call=call,
+        ),
+        AgentMessage(
+            role=MessageRole.TOOL,
+            content=json.dumps(
+                {
+                    "ok": True,
+                    "result": {
+                        "abstained": False,
+                        "notes": [
+                            {
+                                "id": 1,
+                                "title": "Batching",
+                                "content": "Reduced p95 latency.",
+                            }
+                        ],
+                    },
+                }
+            ),
+            tool_call_id="call-1",
+        ),
+    ]
+
+    response = provider.generate(conversation, [])
+
+    assert transport.requests
+    assert isinstance(response.action, FinalAnswerAction)
+    assert response.action.abstained is False
+    assert response.action.citations == ()
 
 
 def test_groq_provider_abstains_locally_when_evidence_is_empty() -> None:
@@ -331,8 +512,8 @@ def test_groq_provider_abstains_locally_when_evidence_is_empty() -> None:
 
     assert response.action == FinalAnswerAction(
         content=(
-            "I couldn't find relevant stored evidence to answer that "
-            "question."
+            "I couldn't find relevant notes or documents to answer that "
+            "question. Add a note or ingest a source, then ask again."
         ),
         abstained=True,
     )

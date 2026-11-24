@@ -265,6 +265,8 @@
 - Prefer client-driven write confirmation over a second LLM turn. Surface the
   preview, require an explicit confirm API with `confirmed=true`, and keep the
   model out of the persistence path.
+- A tiny same-origin UI can unlock daily use without a frontend framework.
+  Probe readiness with a status endpoint, not a throwaway model call.
 
 ## Clarifications and Corrections
 

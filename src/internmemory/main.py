@@ -6,6 +6,8 @@ from datetime import datetime
 from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from internmemory.agent_service import (
     AgentService,
@@ -31,6 +33,7 @@ from internmemory.task_repository import TaskRepository
 DEFAULT_DATABASE_PATH = Path("internmemory.db")
 DEFAULT_INGESTION_ROOT = Path("documents")
 DEFAULT_TIMEZONE = "America/New_York"
+STATIC_DIRECTORY = Path(__file__).resolve().parent / "static"
 DEFAULT_PUBLIC_DOCUMENT_DOMAINS = {
     "docs.python.org",
     "fastapi.tiangolo.com",
@@ -133,6 +136,18 @@ def create_app(
     application.state.public_ingestion_service = public_ingestion_service
     application.state.agent_service = agent_service
     application.include_router(router)
+    application.mount(
+        "/static",
+        StaticFiles(directory=STATIC_DIRECTORY),
+        name="static",
+    )
+
+    @application.get("/", include_in_schema=False)
+    def ui_home() -> FileResponse:
+        """Serve the minimal chat and confirmation UI."""
+
+        return FileResponse(STATIC_DIRECTORY / "index.html")
+
     return application
 
 

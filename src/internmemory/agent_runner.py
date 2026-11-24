@@ -42,10 +42,10 @@ When finished, return only a JSON object with this shape:
   {"source_locator": "exact locator", "source_content_hash": "exact hash",
    "chunk_ids": [1]}
 ]}
-For document answers, use citation values from search_evidence. For note or
-recap answers, cite note ids and work dates from the tool results. For
-abstention, use an empty citations array, set abstained to true, and provide a
-non-empty explanation that stored support is unavailable.
+For document answers, copy citation fields exactly from search_evidence. For
+note or recap answers, use an empty citations array; the application grounds
+those answers from the tool results. For abstention, use an empty citations
+array, set abstained to true, and explain that stored support is unavailable.
 """
 
 

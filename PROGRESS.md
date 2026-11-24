@@ -33,7 +33,7 @@ Phases 1 and 2 are complete. InternMemory now includes:
 
 ## Verification
 
-- Latest test run: `139 passed in 2.50s`
+- Latest test run: `146 passed in 2.14s`
 - IDE diagnostics: no lint errors
 - Local SQLite version tested: `3.40.1` with FTS5 support
 - Retrieval corpus: 36 queries in balanced calibration, regression, and fresh
@@ -130,11 +130,13 @@ Phases 1 and 2 are complete. InternMemory now includes:
   Groq loads from the environment when present, otherwise the endpoint is `503`
 - `pending_confirmation` on agent runs plus `POST /agent/confirm-note` for
   client-driven `save_note` approval without a second model call
+- Minimal chat UI at `/` for ask, pending-note confirmation, and recent notes
+- `GET /agent/status` reports provider readiness without spending tokens
 
 ## Current Task
 
-Phase 3 agent product surface (tools, entrypoint, confirmation) is in place.
-Next is Phase 4 browser/MCP work, or optional durable redacted trace export.
+Phase 3.5 chat UI is in place. Next is Phase 4 browser/MCP work, or optional
+durable redacted trace export.
 
 ## Known Limitations
 
@@ -151,7 +153,7 @@ Next is Phase 4 browser/MCP work, or optional durable redacted trace export.
   exposed as grounded API evidence
 - Public HTML extraction is intentionally simple and limited to configured
   exact domains
-- No custom frontend
+- Chat UI is minimal: no note editor, ingest forms, or multi-turn session store
 - Agent traces are in memory only and have no redacted durable export
 - Character context estimates are tokenizer-independent but not exact
 - Token-usage limits are reactive until a real adapter applies output limits
@@ -168,5 +170,5 @@ Next is Phase 4 browser/MCP work, or optional durable redacted trace export.
 ## Next Steps
 
 1. Begin Phase 4: controlled browser research / MCP.
-2. Optional: durable redacted agent-trace export.
-3. Optional: signed confirmation tokens for draft integrity.
+2. Optional: expand UI for note create/ingest forms.
+3. Optional: durable redacted agent-trace export.

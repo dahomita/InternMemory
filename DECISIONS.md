@@ -313,7 +313,22 @@
   cases, increasing tokens. It preserves the lexical grounding contract and
   avoids trusting topical but unsupported neighbors.
 
+## ADR-032: Ship a minimal same-origin chat UI before Phase 4
+
+- **Problem:** The agent API is usable only through `/docs` or curl, which is
+  too awkward for daily ask/confirm workflows.
+- **Decision:** Serve a static chat page at `/` from FastAPI with no new
+  frontend framework. The page calls `/agent/status`, `/agent/run`,
+  `/agent/confirm-note`, and `/notes`. Treat this as Phase 3.5 before browser
+  research work.
+- **Evidence:** UI and status endpoint tests verify HTML/asset serving and
+  available/unavailable provider reporting without spending model tokens.
+- **Tradeoff:** Vanilla JS is enough for one interaction loop and keeps the
+  dependency budget at $0. A React SPA would scale UI complexity faster but
+  adds toolchain weight before the product loop is proven.
+
 ## ADR-031: Confirm note writes via a client-driven endpoint
+
 
 - **Problem:** `save_note` previews must not persist until a human approves, but
   a second LLM turn is expensive and can invent or alter draft fields.
