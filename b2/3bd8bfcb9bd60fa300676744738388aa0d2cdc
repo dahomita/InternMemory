@@ -1,0 +1,21 @@
+LICENSE
+  s_1eeed8dad0a5f3::t_b41bb8fe7027c1 1-21
+README.md
+  s_1eeed8dad0a5f3::t_ff694362f3a230 6-22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "b23bd8bfcb9bd60fa300676744738388aa0d2cdc",
+  "prompts": {},
+  "sessions": {
+    "s_1eeed8dad0a5f3": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "5bbe39e2-05df-4cdd-a8df-db4b5766451e",
+        "model": "unknown"
+      },
+      "human_author": "Daho Mita <dahomita17062006@gmail.com>"
+    }
+  }
+}
