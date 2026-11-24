@@ -3,6 +3,23 @@
 InternMemory is a local-first engineering knowledge engine with persistent
 memory, search, retrieval, and agent capabilities.
 
+## What / why / status
+
+**What:** A Python FastAPI app that stores projects and notes in SQLite, retrieves
+cited evidence (keyword, optional semantic, and hybrid), and runs a bounded
+agent that can search notes/evidence, draft notes, and save only after explicit
+confirmation. Storage and retrieval stay useful without an LLM.
+
+**Why:** A hands-on project for learning production-shaped AI infrastructure —
+typed interfaces, evaluation, cost/latency awareness, and safe agent write
+boundaries — while keeping early monthly cost near zero.
+
+**Status:** Phases 1–3.5 are complete (memory foundation, document retrieval
+evaluation, agent harness + tools, minimal chat UI). Phase 4 is next:
+controlled browser research and reliability work. See [PROJECT.md](PROJECT.md),
+[PROGRESS.md](PROGRESS.md), [DECISIONS.md](DECISIONS.md), and
+[LEARNING.md](LEARNING.md) for architecture, metrics, and design rationale.
+
 ## Development setup
 
 InternMemory requires Python 3.10 or newer.
