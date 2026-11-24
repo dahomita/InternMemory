@@ -1,0 +1,51 @@
+DECISIONS.md
+  s_cfe57713647727::t_33e6c535aa2aa5 316-329,332
+LEARNING.md
+  s_cfe57713647727::t_595fef83729ac3 268-269
+PROGRESS.md
+  s_cfe57713647727::t_46e8790aad42f6 36,133-134,138-139,156,173-174
+PROJECT.md
+  s_cfe57713647727::t_c50a1e596b7eaf 13,15,49,64-65
+README.md
+  s_cfe57713647727::t_e0e067f55e1705 29-34
+pyproject.toml
+  s_cfe57713647727::t_5e475c673c9f6d 29-31
+src/internmemory/agent_runner.py
+  s_cfe57713647727::t_9ea0efec9010fa 45-48
+src/internmemory/api.py
+  s_cfe57713647727::t_a958c35f2d7207 45,305-323
+src/internmemory/groq_provider.py
+  s_cfe57713647727::t_9916499e59df6c 8,28-35,45-47,49-50,236-247,249-251,277-288,324,363,366-367,378-452,454-460,462,464,466,469-545,581-590,594
+src/internmemory/main.py
+  s_cfe57713647727::t_383997f3b8ce45 9-10,36,139-150
+src/internmemory/schemas.py
+  s_cfe57713647727::t_e64f7e230e3f3d 268-275
+src/internmemory/static/app.css
+  s_cfe57713647727::t_d70bdd448a3415 1-436
+src/internmemory/static/app.js
+  s_cfe57713647727::t_877337658091d7 1-304
+src/internmemory/static/index.html
+  s_cfe57713647727::t_df0669ef223976 1-80
+tests/test_agent_api.py
+  s_cfe57713647727::t_1b1c0f66c3998b 49,55-56
+tests/test_groq_provider.py
+  s_cfe57713647727::t_5540e728a56677 297,309-489,515-516
+tests/test_ui.py
+  s_cfe57713647727::t_c520a0a1a61254 1-70
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "98d17d8689e8c0df6f5c2cb2dbfaa64178d0f3a2",
+  "prompts": {},
+  "sessions": {
+    "s_cfe57713647727": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "3c5540e7-abd4-431d-8200-1b40efcb5929",
+        "model": "unknown"
+      },
+      "human_author": "Daho Mita <dahomita17062006@gmail.com>"
+    }
+  }
+}
