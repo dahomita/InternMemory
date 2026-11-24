@@ -331,12 +331,14 @@ class AgentStepTraceResponse(BaseModel):
 
 
 class AgentPendingNoteConfirmation(BaseModel):
-    """A save_note preview waiting for explicit user approval."""
+    """A write preview waiting for explicit user approval."""
 
+    kind: Literal["note", "ingest_url"] = "note"
     title: str = ""
-    content: str
-    work_date: date
+    content: str | None = None
+    work_date: date | None = None
     project_id: int | None = Field(default=None, gt=0)
+    url: str | None = None
     message: str
 
 
@@ -368,6 +370,33 @@ class AgentConfirmNoteResponse(BaseModel):
 
     written: bool
     note: NoteResponse
+
+
+class AgentConfirmIngestRequest(BaseModel):
+    """Client-driven confirmation of a previously previewed public page."""
+
+    url: str = Field(min_length=1, max_length=2_048)
+    confirmed: Literal[True] = Field(
+        description=(
+            "Must be true. False is rejected; use /agent/run for previews."
+        ),
+    )
+
+    @field_validator("url")
+    @classmethod
+    def url_must_not_be_blank(cls, value: str) -> str:
+        """Reject whitespace-only URLs."""
+
+        if not value.strip():
+            raise ValueError("url must not be blank")
+        return value
+
+
+class AgentConfirmIngestResponse(BaseModel):
+    """Result of confirming a pending public-page ingest."""
+
+    written: bool
+    source: SourceResponse
 
 
 class AgentRunResponse(BaseModel):

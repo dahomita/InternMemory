@@ -267,6 +267,8 @@
   model out of the persistence path.
 - A tiny same-origin UI can unlock daily use without a frontend framework.
   Probe readiness with a status endpoint, not a throwaway model call.
+- Prefer allowlisted fetch tools and confirm-gated ingest before MCP. Reuse
+  the same sanitization and domain policy so research and storage stay aligned.
 
 ## Clarifications and Corrections
 

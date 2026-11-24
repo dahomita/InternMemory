@@ -18,7 +18,9 @@
       <header class="brand-bar">
         <div>
           <p class="brand">InternMemory</p>
-          <p class="tagline">Ask your notes and docs. Confirm before anything is saved.</p>
+          <p class="tagline">
+            Ask local notes and docs, fetch allowlisted pages, and confirm every write.
+          </p>
         </div>
         <p id="provider-status" class="status" role="status">Checking agent…</p>
       </header>
@@ -28,13 +30,13 @@
           <div id="thread" class="thread" aria-live="polite"></div>
 
           <aside id="confirm-panel" class="confirm-panel" hidden>
-            <p class="confirm-label">Pending note</p>
+            <p class="confirm-label" id="confirm-label">Pending write</p>
             <p id="confirm-title" class="confirm-title"></p>
             <pre id="confirm-body" class="confirm-body"></pre>
             <p id="confirm-meta" class="confirm-meta"></p>
             <div class="confirm-actions">
               <button type="button" id="confirm-save" class="btn primary">
-                Save note
+                Confirm
               </button>
               <button type="button" id="confirm-dismiss" class="btn ghost">
                 Dismiss
@@ -49,7 +51,7 @@
               name="message"
               rows="3"
               maxlength="8000"
-              placeholder="What did I note about batching? Or: save a note that…"
+              placeholder="Ask about a note, a stored doc, or an allowlisted public page…"
               required
             ></textarea>
             <div class="composer-row">
@@ -64,14 +66,58 @@
           </form>
         </section>
 
-        <aside class="notes-panel" aria-label="Recent notes">
-          <div class="notes-header">
-            <h2>Recent notes</h2>
-            <button type="button" id="refresh-notes" class="btn ghost small">
-              Refresh
-            </button>
-          </div>
-          <ul id="notes-list" class="notes-list"></ul>
+        <aside class="side-panel" aria-label="Library">
+          <section class="side-block">
+            <div class="notes-header">
+              <h2>Notes</h2>
+              <button type="button" id="refresh-notes" class="btn ghost small">
+                Refresh
+              </button>
+            </div>
+            <form id="note-form" class="side-form">
+              <label>
+                Title
+                <input id="note-title" type="text" maxlength="200" placeholder="Optional title" />
+              </label>
+              <label>
+                Work date
+                <input id="note-date" type="date" required />
+              </label>
+              <label>
+                Content
+                <textarea
+                  id="note-content"
+                  rows="3"
+                  maxlength="8000"
+                  placeholder="What did you learn?"
+                  required
+                ></textarea>
+              </label>
+              <button type="submit" class="btn primary small">Add note</button>
+            </form>
+            <ul id="notes-list" class="notes-list"></ul>
+          </section>
+
+          <section class="side-block">
+            <h2>Ingest URL</h2>
+            <p class="side-help">
+              Allowlisted: docs.python.org, fastapi.tiangolo.com, www.sqlite.org
+            </p>
+            <form id="ingest-form" class="side-form">
+              <label>
+                Public HTTPS URL
+                <input
+                  id="ingest-url"
+                  type="url"
+                  maxlength="2048"
+                  placeholder="https://docs.python.org/3/library/asyncio.html"
+                  required
+                />
+              </label>
+              <button type="submit" class="btn primary small">Ingest page</button>
+            </form>
+            <p id="ingest-status" class="side-status" role="status"></p>
+          </section>
         </aside>
       </main>
     </div>

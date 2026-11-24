@@ -3,18 +3,24 @@
 import json
 from dataclasses import dataclass
 from datetime import date
+from typing import Literal
 
 from internmemory.agent_models import AgentState
 from internmemory.agent_runner import AgentRunner
 from internmemory.agent_tools import (
+    create_fetch_public_page_tool,
     create_get_daily_summary_tool,
+    create_ingest_public_page_tool,
     create_save_note_tool,
     create_search_evidence_tool,
     create_search_notes_tool,
 )
 from internmemory.model_provider import ModelProvider
-from internmemory.models import Note
+from internmemory.models import Note, Source
 from internmemory.note_repository import NoteRepository
+from internmemory.public_ingestion_service import (
+    PublicDocumentIngestionService,
+)
 from internmemory.recap_service import RecapService
 from internmemory.retrieval_service import RetrievalService
 from internmemory.tool_registry import ToolRegistry
@@ -25,23 +31,23 @@ class AgentUnavailableError(RuntimeError):
 
 
 @dataclass(frozen=True, slots=True)
-class PendingNoteConfirmation:
-    """A save_note preview waiting for explicit user approval."""
+class PendingConfirmation:
+    """A write preview waiting for explicit user approval."""
 
-    title: str
-    content: str
-    work_date: date
+    kind: Literal["note", "ingest_url"]
+    message: str
+    title: str = ""
+    content: str | None = None
+    work_date: date | None = None
     project_id: int | None = None
-    message: str = (
-        "Preview only. Call POST /agent/confirm-note with confirmed=true "
-        "to persist."
-    )
+    url: str | None = None
 
 
 def build_default_tool_registry(
     note_repository: NoteRepository,
     retrieval_service: RetrievalService,
     recap_service: RecapService,
+    public_ingestion_service: PublicDocumentIngestionService,
 ) -> ToolRegistry:
     """Wire every product tool against live application services."""
 
@@ -51,16 +57,18 @@ def build_default_tool_registry(
             create_search_evidence_tool(retrieval_service),
             create_get_daily_summary_tool(recap_service),
             create_save_note_tool(note_repository),
+            create_fetch_public_page_tool(public_ingestion_service),
+            create_ingest_public_page_tool(public_ingestion_service),
         ]
     )
 
 
-def extract_pending_note_confirmation(
+def extract_pending_confirmation(
     state: AgentState,
-) -> PendingNoteConfirmation | None:
-    """Return the latest unresolved save_note preview from a run."""
+) -> PendingConfirmation | None:
+    """Return the latest unresolved write preview from a run."""
 
-    pending: PendingNoteConfirmation | None = None
+    pending: PendingConfirmation | None = None
     for step in state.trace:
         observation = step.tool_observation
         if observation is None:
@@ -82,6 +90,33 @@ def extract_pending_note_confirmation(
         preview = result.get("preview")
         if not isinstance(preview, dict):
             continue
+        message = result.get("message")
+        message_text = (
+            message
+            if isinstance(message, str) and message.strip()
+            else "Preview only. Confirm to persist."
+        )
+        kind = preview.get("kind")
+        if kind == "ingest_url" or (
+            kind is None and isinstance(preview.get("url"), str)
+        ):
+            url = preview.get("url")
+            title = preview.get("title", "")
+            if not isinstance(url, str) or not isinstance(title, str):
+                continue
+            pending = PendingConfirmation(
+                kind="ingest_url",
+                title=title,
+                url=url,
+                content=(
+                    preview["content_preview"]
+                    if isinstance(preview.get("content_preview"), str)
+                    else None
+                ),
+                message=message_text,
+            )
+            continue
+
         content = preview.get("content")
         work_date = preview.get("work_date")
         if not isinstance(content, str) or not isinstance(work_date, str):
@@ -92,19 +127,20 @@ def extract_pending_note_confirmation(
             continue
         if not isinstance(title, str):
             continue
-        message = result.get("message")
-        pending = PendingNoteConfirmation(
+        pending = PendingConfirmation(
+            kind="note",
             title=title,
             content=content,
             work_date=date.fromisoformat(work_date),
             project_id=project_id,
-            message=(
-                message
-                if isinstance(message, str) and message.strip()
-                else PendingNoteConfirmation.message
-            ),
+            message=message_text,
         )
     return pending
+
+
+# Backwards-compatible alias used by older tests/docs references.
+extract_pending_note_confirmation = extract_pending_confirmation
+PendingNoteConfirmation = PendingConfirmation
 
 
 class AgentService:
@@ -116,12 +152,14 @@ class AgentService:
         note_repository: NoteRepository,
         model_provider: ModelProvider | None = None,
         *,
+        public_ingestion_service: PublicDocumentIngestionService | None = None,
         max_successful_reads: int = 2,
     ) -> None:
         if max_successful_reads <= 0:
             raise ValueError("max_successful_reads must be positive")
         self._tool_registry = tool_registry
         self._note_repository = note_repository
+        self._public_ingestion_service = public_ingestion_service
         self._model_provider = model_provider
         self._max_successful_reads = max_successful_reads
 
@@ -194,3 +232,22 @@ class AgentService:
             work_date=work_date,
             project_id=project_id,
         )
+
+    def confirm_ingest(
+        self,
+        *,
+        url: str,
+        confirmed: bool,
+    ) -> Source:
+        """Persist a previously previewed public page after confirmation."""
+
+        if self._public_ingestion_service is None:
+            raise ValueError("public ingestion is not configured")
+        if not confirmed:
+            raise ValueError(
+                "confirmed must be true to ingest a page; "
+                "previews are returned by /agent/run"
+            )
+        if not url.strip():
+            raise ValueError("url must not be blank")
+        return self._public_ingestion_service.ingest_url(url)

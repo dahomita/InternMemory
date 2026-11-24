@@ -98,3 +98,7 @@ Overall success requires every relevant dimension to pass.
 
 The deterministic term checks are a transparent baseline, not a semantic
 judge. They cannot prove that every generated statement is supported.
+
+Allowlisted public fetch/ingest tools (`fetch_public_page`,
+`ingest_public_page`) are covered by fake-fetcher unit tests rather than the
+frozen agent split, so live evaluation does not depend on outbound network.

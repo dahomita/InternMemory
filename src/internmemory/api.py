@@ -23,7 +23,7 @@ from internmemory.agent_models import (
 from internmemory.agent_service import (
     AgentService,
     AgentUnavailableError,
-    extract_pending_note_confirmation,
+    extract_pending_confirmation,
 )
 from internmemory.chunk_repository import ChunkRepository
 from internmemory.ingestion_service import IngestionService
@@ -37,6 +37,8 @@ from internmemory.retrieval_service import RetrievalService
 from internmemory.task_repository import TaskRepository
 from internmemory.schemas import (
     AgentCitationResponse,
+    AgentConfirmIngestRequest,
+    AgentConfirmIngestResponse,
     AgentConfirmNoteRequest,
     AgentConfirmNoteResponse,
     AgentPendingNoteConfirmation,
@@ -267,14 +269,16 @@ def _serialize_agent_run(
             )
         trace = tuple(steps)
 
-    pending = extract_pending_note_confirmation(state)
+    pending = extract_pending_confirmation(state)
     pending_confirmation = None
     if pending is not None:
         pending_confirmation = AgentPendingNoteConfirmation(
+            kind=pending.kind,
             title=pending.title,
             content=pending.content,
             work_date=pending.work_date,
             project_id=pending.project_id,
+            url=pending.url,
             message=pending.message,
         )
 
@@ -384,6 +388,39 @@ def confirm_agent_note(
     return AgentConfirmNoteResponse(
         written=True,
         note=NoteResponse.model_validate(note),
+    )
+
+
+@router.post(
+    "/agent/confirm-ingest",
+    response_model=AgentConfirmIngestResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def confirm_agent_ingest(
+    request: AgentConfirmIngestRequest,
+    service: AgentServiceDependency,
+) -> AgentConfirmIngestResponse:
+    """Persist an allowlisted public page only after explicit confirmation."""
+
+    try:
+        source = service.confirm_ingest(
+            url=request.url,
+            confirmed=request.confirmed,
+        )
+    except ValueError as error:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail=str(error),
+        ) from error
+    except OSError as error:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Public document fetch failed",
+        ) from error
+
+    return AgentConfirmIngestResponse(
+        written=True,
+        source=SourceResponse.model_validate(source),
     )
 
 

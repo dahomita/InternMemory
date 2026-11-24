@@ -32,6 +32,8 @@ def test_static_assets_are_served(tmp_path: Path) -> None:
     assert "text/css" in css.headers["content-type"]
     assert js.status_code == 200
     assert "agent/confirm-note" in js.text
+    assert "agent/confirm-ingest" in js.text
+    assert "/notes/" in js.text
 
 
 def test_agent_status_reports_unavailable_without_provider(

@@ -6,6 +6,7 @@
   const includeTrace = document.getElementById("include-trace");
   const providerStatus = document.getElementById("provider-status");
   const confirmPanel = document.getElementById("confirm-panel");
+  const confirmLabel = document.getElementById("confirm-label");
   const confirmTitle = document.getElementById("confirm-title");
   const confirmBody = document.getElementById("confirm-body");
   const confirmMeta = document.getElementById("confirm-meta");
@@ -13,8 +14,24 @@
   const confirmDismiss = document.getElementById("confirm-dismiss");
   const notesList = document.getElementById("notes-list");
   const refreshNotes = document.getElementById("refresh-notes");
+  const noteForm = document.getElementById("note-form");
+  const noteTitle = document.getElementById("note-title");
+  const noteDate = document.getElementById("note-date");
+  const noteContent = document.getElementById("note-content");
+  const ingestForm = document.getElementById("ingest-form");
+  const ingestUrl = document.getElementById("ingest-url");
+  const ingestStatus = document.getElementById("ingest-status");
 
   let pendingConfirmation = null;
+
+  function todayIso() {
+    const now = new Date();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    return `${now.getFullYear()}-${month}-${day}`;
+  }
+
+  noteDate.value = todayIso();
 
   function setBusy(busy) {
     askButton.disabled = busy;
@@ -36,7 +53,8 @@
 
     const roleEl = document.createElement("p");
     roleEl.className = "message-role";
-    roleEl.textContent = role === "user" ? "You" : role === "error" ? "Error" : "InternMemory";
+    roleEl.textContent =
+      role === "user" ? "You" : role === "error" ? "Error" : "InternMemory";
     article.appendChild(roleEl);
 
     const bodyEl = document.createElement("p");
@@ -67,7 +85,7 @@
     const hint = document.createElement("p");
     hint.className = "empty-hint";
     hint.textContent =
-      "Ask about a note, a document, or a daily recap. If the agent drafts a note, you confirm it here before it is saved.";
+      "Ask about notes or docs, add a note on the right, or ingest an allowlisted URL. Writes always need confirmation.";
     thread.appendChild(hint);
   }
 
@@ -81,11 +99,18 @@
 
   function showConfirmation(pending) {
     pendingConfirmation = pending;
-    confirmTitle.textContent = pending.title || "Untitled note";
-    confirmBody.textContent = pending.content || "";
-    const project =
-      pending.project_id == null ? "no project" : `project ${pending.project_id}`;
-    confirmMeta.textContent = `${pending.work_date} · ${project}`;
+    const isIngest = pending.kind === "ingest_url";
+    confirmLabel.textContent = isIngest ? "Pending ingest" : "Pending note";
+    confirmSave.textContent = isIngest ? "Ingest page" : "Save note";
+    confirmTitle.textContent = pending.title || (isIngest ? "Public page" : "Untitled note");
+    confirmBody.textContent = pending.content || pending.url || "";
+    if (isIngest) {
+      confirmMeta.textContent = pending.url || "";
+    } else {
+      const project =
+        pending.project_id == null ? "no project" : `project ${pending.project_id}`;
+      confirmMeta.textContent = `${pending.work_date || "?"} · ${project}`;
+    }
     confirmPanel.hidden = false;
   }
 
@@ -159,14 +184,35 @@
         const item = document.createElement("li");
         item.className = "note-item";
 
+        const top = document.createElement("div");
+        top.className = "note-top";
+
         const title = document.createElement("p");
         title.className = "note-title";
         title.textContent = note.title || "Untitled note";
-        item.appendChild(title);
+        top.appendChild(title);
+
+        const del = document.createElement("button");
+        del.type = "button";
+        del.className = "btn ghost small danger";
+        del.textContent = "Delete";
+        del.addEventListener("click", async () => {
+          if (!window.confirm(`Delete note #${note.id}?`)) {
+            return;
+          }
+          const response = await fetch(`/notes/${note.id}`, { method: "DELETE" });
+          if (!response.ok && response.status !== 204) {
+            appendMessage("error", await readError(response));
+            return;
+          }
+          await loadNotes();
+        });
+        top.appendChild(del);
+        item.appendChild(top);
 
         const date = document.createElement("p");
         date.className = "note-date";
-        date.textContent = note.work_date;
+        date.textContent = `#${note.id} · ${note.work_date}`;
         item.appendChild(date);
 
         const snippet = document.createElement("p");
@@ -254,29 +300,49 @@
     }
     setBusy(true);
     try {
-      const response = await fetch("/agent/confirm-note", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: pendingConfirmation.title || "",
-          content: pendingConfirmation.content,
-          work_date: pendingConfirmation.work_date,
-          project_id: pendingConfirmation.project_id,
-          confirmed: true,
-        }),
-      });
-      if (!response.ok) {
-        throw new Error(await readError(response));
+      if (pendingConfirmation.kind === "ingest_url") {
+        const response = await fetch("/agent/confirm-ingest", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            url: pendingConfirmation.url,
+            confirmed: true,
+          }),
+        });
+        if (!response.ok) {
+          throw new Error(await readError(response));
+        }
+        const payload = await response.json();
+        hideConfirmation();
+        appendMessage(
+          "assistant",
+          `Ingested “${payload.source.title}” from ${payload.source.locator}`,
+        );
+      } else {
+        const response = await fetch("/agent/confirm-note", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: pendingConfirmation.title || "",
+            content: pendingConfirmation.content,
+            work_date: pendingConfirmation.work_date,
+            project_id: pendingConfirmation.project_id,
+            confirmed: true,
+          }),
+        });
+        if (!response.ok) {
+          throw new Error(await readError(response));
+        }
+        const payload = await response.json();
+        hideConfirmation();
+        appendMessage(
+          "assistant",
+          `Saved note #${payload.note.id}: ${payload.note.title || "Untitled note"}`,
+        );
+        await loadNotes();
       }
-      const payload = await response.json();
-      hideConfirmation();
-      appendMessage(
-        "assistant",
-        `Saved note #${payload.note.id}: ${payload.note.title || "Untitled note"}`,
-      );
-      await loadNotes();
     } catch (error) {
-      appendMessage("error", error.message || "Could not save note.");
+      appendMessage("error", error.message || "Could not confirm write.");
     } finally {
       setBusy(false);
     }
@@ -285,6 +351,55 @@
   confirmDismiss.addEventListener("click", () => {
     hideConfirmation();
     appendMessage("assistant", "Draft dismissed. Nothing was saved.");
+  });
+
+  noteForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const payload = {
+      title: noteTitle.value.trim(),
+      content: noteContent.value.trim(),
+      work_date: noteDate.value,
+    };
+    try {
+      const response = await fetch("/notes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) {
+        throw new Error(await readError(response));
+      }
+      noteTitle.value = "";
+      noteContent.value = "";
+      await loadNotes();
+      appendMessage("assistant", `Added note “${payload.title || "Untitled note"}”.`);
+    } catch (error) {
+      appendMessage("error", error.message || "Could not create note.");
+    }
+  });
+
+  ingestForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    ingestStatus.textContent = "Ingesting…";
+    try {
+      const response = await fetch("/sources/ingest-url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: ingestUrl.value.trim() }),
+      });
+      if (!response.ok) {
+        throw new Error(await readError(response));
+      }
+      const source = await response.json();
+      ingestStatus.textContent = `Stored “${source.title}”.`;
+      appendMessage(
+        "assistant",
+        `Ingested public page “${source.title}”. You can ask about it now.`,
+      );
+      ingestUrl.value = "";
+    } catch (error) {
+      ingestStatus.textContent = error.message || "Ingest failed.";
+    }
   });
 
   refreshNotes.addEventListener("click", () => {

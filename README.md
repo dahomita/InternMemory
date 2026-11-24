@@ -14,9 +14,8 @@ confirmation. Storage and retrieval stay useful without an LLM.
 typed interfaces, evaluation, cost/latency awareness, and safe agent write
 boundaries — while keeping early monthly cost near zero.
 
-**Status:** Phases 1–3.5 are complete (memory foundation, document retrieval
-evaluation, agent harness + tools, minimal chat UI). Phase 4 is next:
-controlled browser research and reliability work. See [PROJECT.md](PROJECT.md),
+**Status:** Phases 1–3.5 are complete. Phase 4 allowlisted fetch/ingest tools and
+richer UI are in place; MCP is deferred. See [PROJECT.md](PROJECT.md),
 [PROGRESS.md](PROGRESS.md), [DECISIONS.md](DECISIONS.md), and
 [LEARNING.md](LEARNING.md) for architecture, metrics, and design rationale.
 
@@ -46,9 +45,10 @@ uvicorn internmemory.main:app --reload
 Open <http://127.0.0.1:8000/> for the chat UI, <http://127.0.0.1:8000/health>
 to check the service, or <http://127.0.0.1:8000/docs> for OpenAPI docs.
 
-The UI asks through `POST /agent/run`, shows pending note drafts, and saves
-only after you click **Save note** (`POST /agent/confirm-note`). Set
-`GROQ_API_KEY` before asking; notes still load without a model.
+The UI supports ask/confirm, note create/delete, and allowlisted URL ingest.
+Agent asks go through `POST /agent/run`; pending writes confirm via
+`/agent/confirm-note` or `/agent/confirm-ingest`. Set `GROQ_API_KEY` before
+asking; notes and ingest still work without a model.
 
 Search for grouped, cited evidence:
 

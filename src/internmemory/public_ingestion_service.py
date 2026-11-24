@@ -33,6 +33,16 @@ class FetchedDocument:
     body: bytes
 
 
+@dataclass(frozen=True, slots=True)
+class PublicPageContent:
+    """Sanitized visible text from one allowlisted public page."""
+
+    url: str
+    title: str
+    content: str
+    content_type: str
+
+
 class DocumentFetcher(Protocol):
     """Fetch bounded bytes without coupling ingestion to one HTTP client."""
 
@@ -109,8 +119,8 @@ class PublicDocumentIngestionService:
         self._timeout_seconds = timeout_seconds
         self._fetcher = fetcher or UrlLibDocumentFetcher()
 
-    def ingest_url(self, url: str) -> Source:
-        """Ingest one HTTPS document after validating request and redirect."""
+    def fetch_page(self, url: str) -> PublicPageContent:
+        """Fetch and sanitize one page without writing to storage."""
 
         self._validate_url(url)
         fetched = self._fetcher.fetch(
@@ -145,20 +155,35 @@ class PublicDocumentIngestionService:
         if not content:
             raise ValueError("public document contains no visible text")
 
-        content_bytes = content.encode("utf-8")
-        source = self._source_repository.upsert_source(
-            source_type=SourceType.TEXT,
-            locator=fetched.final_url,
+        return PublicPageContent(
+            url=fetched.final_url,
             title=title,
             content=content,
+            content_type=content_type,
+        )
+
+    def ingest_page(self, page: PublicPageContent) -> Source:
+        """Persist one already-fetched sanitized page into searchable storage."""
+
+        content_bytes = page.content.encode("utf-8")
+        source = self._source_repository.upsert_source(
+            source_type=SourceType.TEXT,
+            locator=page.url,
+            title=page.title,
+            content=page.content,
             content_hash=hashlib.sha256(content_bytes).hexdigest(),
             byte_size=len(content_bytes),
         )
         self._chunk_repository.replace_for_source(
             source.id,
-            chunk_text(content, max_chars=self._max_chunk_chars),
+            chunk_text(page.content, max_chars=self._max_chunk_chars),
         )
         return source
+
+    def ingest_url(self, url: str) -> Source:
+        """Ingest one HTTPS document after validating request and redirect."""
+
+        return self.ingest_page(self.fetch_page(url))
 
     def _validate_url(self, url: str) -> None:
         """Require HTTPS and an exact allowlisted hostname."""

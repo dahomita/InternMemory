@@ -322,10 +322,20 @@ textarea:focus {
   font-size: 0.85rem;
 }
 
-.notes-panel {
-  padding: 1rem;
+.side-panel {
+  display: grid;
+  gap: 1rem;
   position: sticky;
   top: 1rem;
+}
+
+.side-block {
+  padding: 1rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
 }
 
 .notes-header {
@@ -336,11 +346,50 @@ textarea:focus {
   margin-bottom: 0.75rem;
 }
 
-.notes-header h2 {
+.notes-header h2,
+.side-block > h2 {
   margin: 0;
   font-family: var(--font-brand);
   font-size: 1.35rem;
   font-weight: 560;
+}
+
+.side-help {
+  margin: 0.45rem 0 0.75rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.side-form {
+  display: grid;
+  gap: 0.65rem;
+  margin-bottom: 0.85rem;
+}
+
+.side-form label {
+  display: grid;
+  gap: 0.3rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.side-form input,
+.side-form textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel-strong);
+  color: var(--ink);
+  font: inherit;
+  padding: 0.55rem 0.7rem;
+}
+
+.side-status {
+  margin: 0.35rem 0 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+  min-height: 1.2em;
 }
 
 .notes-list {
@@ -349,7 +398,7 @@ textarea:focus {
   padding: 0;
   display: grid;
   gap: 0.65rem;
-  max-height: min(68vh, 720px);
+  max-height: min(42vh, 420px);
   overflow: auto;
 }
 
@@ -362,6 +411,13 @@ textarea:focus {
 .note-item:first-child {
   border-top: 0;
   padding-top: 0.15rem;
+}
+
+.note-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  align-items: start;
 }
 
 .note-title {
@@ -381,6 +437,12 @@ textarea:focus {
   color: var(--muted);
   font-size: 0.9rem;
   line-height: 1.4;
+}
+
+.btn.danger {
+  background: transparent;
+  border-color: rgba(143, 47, 47, 0.28);
+  color: var(--danger);
 }
 
 .sr-only {
@@ -426,7 +488,7 @@ textarea:focus {
     align-items: start;
   }
 
-  .notes-panel {
+  .side-panel {
     position: static;
   }
 

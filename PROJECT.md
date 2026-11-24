@@ -47,6 +47,8 @@ Storage and retrieval remain independent of model providers.
 - Product `POST /agent/run` over the full tool registry
 - Client-driven `POST /agent/confirm-note` for confirmation-gated writes
 - Minimal same-origin chat UI for ask + confirm-note flows
+- Allowlisted `fetch_public_page` and confirm-gated `ingest_public_page` tools
+- Richer UI for note create/delete and public URL ingest
 
 ## Requirements
 
@@ -63,7 +65,7 @@ Storage and retrieval remain independent of model providers.
 2. Document ingestion and retrieval evaluation — complete
 3. Model-independent agent harness and tools — complete
 3.5 Minimal chat + confirmation UI — complete
-4. Controlled browser research and reliability work
+4. Controlled browser research and reliability work — tools/UI done; MCP deferred
 
 ## Security Boundary
 

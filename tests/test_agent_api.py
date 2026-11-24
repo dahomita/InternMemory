@@ -21,8 +21,10 @@ from internmemory.database import initialize_database
 from internmemory.main import create_app
 from internmemory.model_provider import ScriptedModelProvider
 from internmemory.note_repository import NoteRepository
+from internmemory.public_ingestion_service import PublicDocumentIngestionService
 from internmemory.recap_service import RecapService
 from internmemory.retrieval_service import RetrievalService
+from internmemory.source_repository import SourceRepository
 from internmemory.task_repository import TaskRepository
 
 
@@ -114,6 +116,8 @@ def test_agent_run_uses_full_tool_registry_with_scripted_provider(
         "search_evidence",
         "get_daily_summary",
         "save_note",
+        "fetch_public_page",
+        "ingest_public_page",
     ]
     assert payload["step_count"] == 2
     assert payload["usage"]["input_tokens"] == 30
@@ -168,10 +172,12 @@ def test_agent_run_surfaces_pending_note_confirmation(
 
     assert response.status_code == 200
     assert payload["pending_confirmation"] == {
+        "kind": "note",
         "title": "Draft",
         "content": "Needs confirmation before write.",
         "work_date": "2026-11-22",
         "project_id": None,
+        "url": None,
         "message": (
             "Preview only. Call save_note again with the same "
             "fields and confirmed=true to persist."
@@ -240,6 +246,11 @@ def test_agent_service_exposes_all_product_tools(
     database_path = tmp_path / "tools.db"
     initialize_database(database_path)
     notes = NoteRepository(database_path)
+    public = PublicDocumentIngestionService(
+        SourceRepository(database_path),
+        ChunkRepository(database_path),
+        allowed_domains={"docs.example.test"},
+    )
     service = AgentService(
         build_default_tool_registry(
             notes,
@@ -249,8 +260,10 @@ def test_agent_service_exposes_all_product_tools(
                 TaskRepository(database_path),
                 timezone_name="America/New_York",
             ),
+            public,
         ),
         notes,
+        public_ingestion_service=public,
     )
 
     assert service.tool_names == (
@@ -258,5 +271,7 @@ def test_agent_service_exposes_all_product_tools(
         "search_evidence",
         "get_daily_summary",
         "save_note",
+        "fetch_public_page",
+        "ingest_public_page",
     )
     assert service.is_available is False

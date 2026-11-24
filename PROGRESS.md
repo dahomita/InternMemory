@@ -33,7 +33,7 @@ Phases 1 and 2 are complete. InternMemory now includes:
 
 ## Verification
 
-- Latest test run: `146 passed in 2.14s`
+- Latest test run: `151 passed in 2.31s`
 - IDE diagnostics: no lint errors
 - Local SQLite version tested: `3.40.1` with FTS5 support
 - Retrieval corpus: 36 queries in balanced calibration, regression, and fresh
@@ -132,11 +132,14 @@ Phases 1 and 2 are complete. InternMemory now includes:
   client-driven `save_note` approval without a second model call
 - Minimal chat UI at `/` for ask, pending-note confirmation, and recent notes
 - `GET /agent/status` reports provider readiness without spending tokens
+- Phase 4 (no MCP): `fetch_public_page` + confirm-gated `ingest_public_page`
+- Richer UI: create/delete notes and allowlisted URL ingest
+- `POST /agent/confirm-ingest` for client-driven public-page approval
 
 ## Current Task
 
-Phase 3.5 chat UI is in place. Next is Phase 4 browser/MCP work, or optional
-durable redacted trace export.
+Phase 4 tool/UI work without MCP is in place. Optional next: MCP adapter,
+durable redacted traces, or broader allowlists after measurement.
 
 ## Known Limitations
 
@@ -153,7 +156,8 @@ durable redacted trace export.
   exposed as grounded API evidence
 - Public HTML extraction is intentionally simple and limited to configured
   exact domains
-- Chat UI is minimal: no note editor, ingest forms, or multi-turn session store
+- Chat UI has no multi-turn session store or signed confirmation tokens
+- MCP adapter is intentionally deferred
 - Agent traces are in memory only and have no redacted durable export
 - Character context estimates are tokenizer-independent but not exact
 - Token-usage limits are reactive until a real adapter applies output limits
@@ -169,6 +173,6 @@ durable redacted trace export.
 
 ## Next Steps
 
-1. Begin Phase 4: controlled browser research / MCP.
-2. Optional: expand UI for note create/ingest forms.
-3. Optional: durable redacted agent-trace export.
+1. Optional: MCP adapter over the existing tool contracts.
+2. Optional: durable redacted agent-trace export.
+3. Optional: signed confirmation tokens for draft integrity.

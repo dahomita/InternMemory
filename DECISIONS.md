@@ -313,7 +313,21 @@
   cases, increasing tokens. It preserves the lexical grounding contract and
   avoids trusting topical but unsupported neighbors.
 
+## ADR-033: Add allowlisted fetch/ingest tools before MCP
+
+- **Problem:** Phase 4 needs controlled web research without adopting MCP yet,
+  and writes to the document store must stay confirmation-gated.
+- **Decision:** Expose `fetch_public_page` (read-only) and confirm-gated
+  `ingest_public_page` over the existing allowlisted public ingestion service.
+  Reuse HTTPS domain allowlisting, timeouts, and HTML sanitization. Defer MCP
+  until the tool contracts are stable.
+- **Evidence:** Fake-fetcher unit tests cover sanitization, domain denial,
+  preview-before-write, and tool retention after ingest preview.
+- **Tradeoff:** Direct tools are simpler to evaluate than an MCP server, but
+  clients cannot discover them through MCP until a later adapter exists.
+
 ## ADR-032: Ship a minimal same-origin chat UI before Phase 4
+
 
 - **Problem:** The agent API is usable only through `/docs` or curl, which is
   too awkward for daily ask/confirm workflows.

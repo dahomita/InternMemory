@@ -435,6 +435,13 @@ class GroqModelProvider:
                     has_support = True
                 continue
 
+            page = result.get("page")
+            if isinstance(page, dict) and page.get("content"):
+                has_support = True
+                continue
+            if "page" in result:
+                continue
+
             has_support = True
 
         return _ToolSupport(
@@ -603,9 +610,11 @@ class GroqModelProvider:
 
     @staticmethod
     def _parse_tool_call(value: object) -> ToolCallAction:
-        if not isinstance(value, list) or len(value) != 1:
+        # Models sometimes emit parallel tool calls; the harness executes one
+        # sequential call per step, so keep the first and ignore the rest.
+        if not isinstance(value, list) or not value:
             raise ModelProviderError(
-                "Groq must return exactly one tool call per step"
+                "Groq must return at least one tool call"
             )
         try:
             call = value[0]

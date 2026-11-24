@@ -170,6 +170,58 @@ def tools() -> list[ToolDefinition]:
     ]
 
 
+def test_groq_provider_keeps_first_of_parallel_tool_calls() -> None:
+    transport = FakeJsonTransport(
+        [
+            {
+                "choices": [
+                    {
+                        "message": {
+                            "role": "assistant",
+                            "content": None,
+                            "tool_calls": [
+                                {
+                                    "id": "call-1",
+                                    "type": "function",
+                                    "function": {
+                                        "name": "search_notes",
+                                        "arguments": json.dumps(
+                                            {"query": "batching"}
+                                        ),
+                                    },
+                                },
+                                {
+                                    "id": "call-2",
+                                    "type": "function",
+                                    "function": {
+                                        "name": "search_evidence",
+                                        "arguments": json.dumps(
+                                            {"query": "batching"}
+                                        ),
+                                    },
+                                },
+                            ],
+                        }
+                    }
+                ],
+                "usage": {
+                    "prompt_tokens": 90,
+                    "completion_tokens": 25,
+                },
+            }
+        ]
+    )
+    provider = GroqModelProvider("test-key", transport=transport)
+
+    response = provider.generate(messages(), tools())
+
+    assert response.action == ToolCallAction(
+        call_id="call-1",
+        tool_name="search_notes",
+        arguments={"query": "batching"},
+    )
+
+
 def test_groq_provider_sends_bounded_tool_request() -> None:
     transport = FakeJsonTransport([tool_response()])
     provider = GroqModelProvider(

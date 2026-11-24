@@ -107,12 +107,14 @@ def create_app(
             note_repository,
             retrieval_service,
             recap_service,
+            public_ingestion_service,
         ),
         note_repository,
         _resolve_model_provider(
             model_provider,
             enable_groq=enable_groq,
         ),
+        public_ingestion_service=public_ingestion_service,
     )
 
     @asynccontextmanager
